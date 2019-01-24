@@ -1,11 +1,19 @@
 import Endpoint from '~/components/api/endpoint'
-import Example from '~/components/example'
-import Request from '~/components/api/request'
-import { Code } from '~/components/text/code'
-import Heading from '~/components/text/linked-heading'
-import { HelpLink } from '~/components/text/link'
+import { GenericLink, HelpLink } from '~/components/text/link'
+import { Code, InlineCode } from '~/components/code'
+import H2 from '~/components/text/h2'
 import H3 from '~/components/text/h3'
 import H4 from '~/components/text/h4'
+import H5 from '~/components/text/h5'
+import H6 from '~/components/text/h6'
+import { UL, LI } from '~/components/list'
+import { P } from '~/components/text/paragraph'
+import Strong from '~/components/text/strong'
+import Quote from '~/components/text/quote'
+import Markdown from 'react-markdown'
+import Example from '~/components/example'
+import Request from '~/components/api/request'
+import Heading from '~/components/text/linked-heading'
 
 // Copy/pasted from docs.js
 const DocH3 = ({ children }) => (
@@ -33,6 +41,44 @@ const DocH4 = ({ children }) => (
     `}</style>
   </div>
 )
+
+const CodeMarkdown = ({ language, value }) => (
+  <Code lang={language}>{value}</Code>
+)
+const DocMarkdown = source => (
+  <Markdown source={source} renderers={mdxComponents} />
+)
+
+const Headings = ({ level, children }) => {
+  switch (level) {
+    case 1:
+      // This helps us put the title on above the custom buttons
+      return null
+    case 2:
+      return <H2>{children}</H2>
+    case 3:
+      return <H3>{children}</H3>
+    case 4:
+      return <H4>{children}</H4>
+    case 5:
+      return <H5>{children}</H5>
+    case 6:
+      return <H6>{children}</H6>
+    default:
+      return <p>{children}</p>
+  }
+}
+
+const mdxComponents = {
+  paragraph: P,
+  strong: Strong,
+  list: UL,
+  listItem: LI,
+  heading: Headings,
+  inlineCode: InlineCode,
+  link: GenericLink,
+  blockquote: Quote
+}
 
 const capitalize = string => {
   return string.charAt(0).toUpperCase() + string.slice(1)
@@ -184,9 +230,7 @@ const tableBody = (spec, properties, requiredFieldNames) => {
 
             {requiredColumn}
 
-            <td className="table-cell">
-              <div>{propertyDescription}</div>
-            </td>
+            <td className="table-cell">{DocMarkdown(propertyDescription)}</td>
           </tr>
         )
       })}
@@ -220,7 +264,7 @@ const objectTable = (tableType, spec, schema) => {
   const schemaProperties = schemaObject && schemaObject.properties
 
   /* Handle the special case where the table is given a non-object type,
-  e.g. the api response has a top-level array returned. These should be 
+  e.g. the api response has a top-level array returned. These should be
   normalized inside the api implementation in the future, and this special-case
   removed */
   const isSpecialCase = !schemaProperties
@@ -288,20 +332,19 @@ const operationDetails = (spec, operation, method, url) => {
         </a>
       </DocH3>
       <Endpoint method={method} url={url} />
-      <p className="jsx-3121034208">{operation.description}</p>
-
+      {DocMarkdown(operation.description)}
       {requestBodySchema && objectTable('request', spec, requestBodySchema)}
-
       {successResponseBodySchema &&
         objectTable('response', spec, successResponseBodySchema)}
-
       {Object.keys(requestExamples).map(exampleName => {
         const exampleRequest = requestExamples[exampleName]
         const exampleResponse = successResponseExamples[exampleName]
 
         return (
           <Example>
-            <span>{exampleRequest.summary}</span>
+            <span>
+              {DocMarkdown((exampleRequest.summary || 'Example request') + ':')}
+            </span>
             <Request
               url={`https://api.zeit.co${url}`}
               method={method.toUpperCase()}
@@ -315,7 +358,11 @@ const operationDetails = (spec, operation, method, url) => {
             />
             {!exampleResponse ? null : (
               <>
-                <span>{exampleResponse.summary || 'Example response'}:</span>
+                <span>
+                  {DocMarkdown(
+                    (exampleResponse.summary || 'Example response') + ':'
+                  )}
+                </span>
                 <Code lang="json">
                   {JSON.stringify(exampleResponse.value, null, 2)}
                 </Code>

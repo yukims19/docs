@@ -70,7 +70,7 @@
     "/now/registration/verify": {
       "get": {
         "operationId": "VerifyLogin",
-        "description": "Verify the user accepted the login request and get a authentication token. The user email address and the token received after requesting the login must be added to the URL as a query string with the names email and token.",
+        "description": "Verify the user accepted the login request and get a authentication token. The user email address and the token received after [requesting the login](#endpoints/authentication/request-a-login) must be added to the URL as a query string with the names `email` and `token`.",
         "parameters": [
           {
             "in": "query",
@@ -138,7 +138,7 @@
       },
       "post": {
         "operationId": "CreateATeamV1",
-        "description": "Create a new team under your account. You need to send a POST request with the desired team slug.",
+        "description": "Create a new team under your account. You need to send a `POST` request with the desired team slug.",
         "parameters": [],
         "responses": {
           "200": {
@@ -176,7 +176,7 @@
     "/v1/teams/{id}": {
       "patch": {
         "operationId": "UpdateTeamInformationV1",
-        "description": "Update the information of the team defined with the id. You need to send a PATCH request with a body containing the information you want to change.",
+        "description": "Update the information of the team defined with the id. You need to send a `PATCH` request with a body containing the information you want to change.\n\n**Note:** You need to be `OWNER` to use it.",
         "parameters": [
           {
             "in": "path",
@@ -225,7 +225,7 @@
       },
       "get": {
         "operationId": "GetSingleTeamInformationV1",
-        "description": "Get the information of a specific team, it could be used either passing the :id in the URL or the team slug as a query parameter.",
+        "description": "Get the information of a specific team, it could be used either passing the `:id` in the URL or the team `slug` as a query parameter.",
         "parameters": [
           {
             "in": "path",
@@ -253,7 +253,7 @@
     "/v1/teams/{id}/members": {
       "post": {
         "operationId": "InviteUserToTeamV1",
-        "description": "Invite a user to join the team specified in the URL. To use it send a POST request with the user email in the body.",
+        "description": "Invite a user to join the team specified in the URL. To use it send a `POST` request with the user email in the body.\n\n**Note:** You need to be `OWNER` to use it.",
         "parameters": [
           {
             "in": "path",
@@ -351,7 +351,7 @@
     "/v1/teams/{id}/members/{userId}": {
       "delete": {
         "operationId": "RemoveUserFromTeamV1",
-        "description": "Remove the specified user from a team.",
+        "description": "Remove the specified user from a team.\n\n**Note:** You need to be `OWNER` to use it and the user must not be an owner themselves.",
         "parameters": [
           {
             "in": "path",
@@ -387,7 +387,7 @@
       },
       "patch": {
         "operationId": "ChangeUserRoleV1",
-        "description": "Change the role of an user inside a team member. To change it send a PATCH request, if the change is done you will receive a 200 status code with an empty body.",
+        "description": "Change the role of an user inside a team member. To change it send a `PATCH` request, if the change is done you will receive a 200 status code with an empty body.\n\n**Note:** You need to be `OWNER` to use it.",
         "parameters": [
           {
             "in": "path",
@@ -632,7 +632,7 @@
     "/v2/domains/{domain}/records": {
       "post": {
         "operationId": "CreateANewDnsRecordV2",
-        "description": "Create a DNS record for a domain specified in the URL. mxPriority\nfield should be set for MX records and left out otherwise.",
+        "description": "Create a DNS record for a domain specified in the URL. `mxPriority` field should be set for MX records and left out otherwise.",
         "parameters": [
           {
             "in": "path",
@@ -860,7 +860,7 @@
     "/v2/now/aliases/{id}": {
       "delete": {
         "operationId": "RemoveAnAliasV2",
-        "description": "The API allows you to delete an alias by supplying the alias :id in the url.\nYou can obtain this id from the list of aliases.",
+        "description": "The API allows you to delete an alias by supplying the alias `:id` in the url. You can obtain this id from the list of aliases.",
         "parameters": [
           {
             "in": "path",
@@ -884,6 +884,14 @@
                     }
                   },
                   "type": "object"
+                },
+                "examples": {
+                  "successSimple": {
+                    "summary": "Example successful (200) response",
+                    "value": {
+                      "status": "SUCCESS"
+                    }
+                  }
                 }
               }
             }
@@ -892,7 +900,7 @@
       },
       "purge": {
         "operationId": "PurgeAliasInNowCdnV2",
-        "description": "Purges the CDN of content from the given alias via :id.",
+        "description": "Purges [the CDN](/docs/v2/domains-and-aliases/cdn/) of content from the given alias via `:id`.",
         "parameters": [
           {
             "in": "path",
@@ -903,6 +911,18 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "simple": {
+                  "summary": "Example of a `PURGE` request",
+                  "value": null
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -911,11 +931,19 @@
                 "schema": {
                   "properties": {
                     "status": {
-                      "description": "The status of the purge request. The value should be REQUESTED.",
+                      "description": "The status of the purge request. The value should be `REQUESTED`.",
                       "type": "string"
                     }
                   },
                   "type": "object"
+                },
+                "examples": {
+                  "simple": {
+                    "summary": "Example successful (**200**) response",
+                    "value": {
+                      "status": "REQUESTED"
+                    }
+                  }
                 }
               }
             }
@@ -926,7 +954,7 @@
     "/v2/now/deployments/{id}/aliases": {
       "post": {
         "operationId": "AssignAnAliasToADeploymentV2",
-        "description": "Creates a new alias for the deployment with the given :id. The authenticated user must own this deployment.",
+        "description": "Creates a new alias for the deployment with the given `:id`. The authenticated user must own this deployment.\n\nThe JSON body of the POST should contain an `alias` key with the desired alias (hostname or custom url).\n\nIf the desired alias was used before it will be removed from the old deployment and assigned to the new one.",
         "parameters": [
           {
             "in": "path",
@@ -958,6 +986,23 @@
                     }
                   },
                   "type": "object"
+                },
+                "examples": {
+                  "simple": {
+                    "summary": "Example successful (200) response for new alias",
+                    "value": {
+                      "uid": "2WjyKQmM8ZnGcJsPWMrHRHrE",
+                      "created": "2016-06-02T21:01:40.950Z"
+                    }
+                  },
+                  "existingAlias": {
+                    "summary": "Example successful (**200**) response for alias with existing deployment (`oldId` is the id of the previous deployment)",
+                    "value": {
+                      "oldId": "c9MrOWGzdJSfPxqyTDYhdEGN",
+                      "uid": "2WjyKQmM8ZnGcJsPWMrHRHrE",
+                      "created": "2016-06-02T21:01:40.950Z"
+                    }
+                  }
                 }
               }
             }
@@ -975,6 +1020,20 @@
                 },
                 "required": ["alias"],
                 "type": "object"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Example request",
+                  "value": {
+                    "alias": "my-alias.now.sh"
+                  }
+                },
+                "existingAlias": {
+                  "summary": "Example request for an alias with an existing deployment id",
+                  "value": {
+                    "alias": "my-existing-alias.now.sh"
+                  }
+                }
               }
             }
           },
@@ -983,7 +1042,7 @@
       },
       "get": {
         "operationId": "ListAliasesByDeploymentV2",
-        "description": "Retrieves all of the aliases for the deployment with the given :id.\nThe authenticating user must own this deployment.\nThe body will contain an entry for each alias.",
+        "description": "Retrieves all of the aliases for the deployment with the given `:id`. The authenticating user must own this deployment. The body will contain an entry for each alias.",
         "parameters": [
           {
             "in": "path",
@@ -1052,7 +1111,7 @@
     "/v2/now/files": {
       "post": {
         "operationId": "UploadDeploymentFilesV2",
-        "description": "Before you create a deployment you need to upload the required files for that deployment. To do it you need to POST each file to this endpoint, after that's completed you'll need to POST to create a new deployment.",
+        "description": "Before you create a deployment you need to upload the required files for that deployment. To do it you need to POST each file to this endpoint, after that's completed you'll need to POST to [create a new deployment](#endpoints/deployments/create-a-new-deployment).\n\n**Note:** If you need to upload only a few small files for a deployment you could inline them when you're [creating a new deployment](#endpoints/deployments/create-a-new-deployment).",
         "parameters": [
           {
             "description": "The file size in bytes.",
@@ -1092,7 +1151,7 @@
     "/v2/now/secrets": {
       "post": {
         "operationId": "CreateANewSecretV2",
-        "description": "Creates a new secret. The body should contain name and value strings.",
+        "description": "Creates a new secret. The body should contain `name` and `value` strings.\n\n**Note:** The name of the secret couldn't be bigger than 100 characters.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1220,7 +1279,7 @@
       },
       "patch": {
         "operationId": "ChangeSecretNameV2",
-        "description": "This endpoint provides an opportunity to edit the name\nof a user's secret. The name has to be unique to that user's secrets.",
+        "description": "This endpoint provides an opportunity to edit the `name` of a user's secret. The name has to be unique to that user's secrets.\n\nThe body must contain a field `name` with the new name to use.",
         "parameters": [
           {
             "in": "path",
@@ -1283,7 +1342,7 @@
     "/v3/now/certs": {
       "put": {
         "operationId": "SubmitACertificateV3",
-        "description": "Create a new certificate entry with a user-supplied certificate.",
+        "description": "Create a new certificate entry with a user-supplied certificate.\n\nThe body should contain `cert`, private `key`, and `ca` chain fields in PEM format.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1331,7 +1390,7 @@
       },
       "post": {
         "operationId": "CreateANewCertificateV3",
-        "description": "Issues and stores a new certificate for the common names given in\nthe body using Let's Encrypt.",
+        "description": "Issues and stores a new certificate for the common names given in the body using Let's Encrypt.\n\nThe body should contain \\`domains\\` array and it may contain \\`renew\\` field to renew an existing certificate.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1487,7 +1546,7 @@
     "/v3/now/deployments": {
       "get": {
         "operationId": "ListDeploymentsV3",
-        "description": "List all the deployments under the account corresponding to the API token.",
+        "description": "List all the deployments under the account corresponding to the API token.\n\nIf a deployment hasn't finished uploading (is incomplete), the `url` property will have a value of `null`.\n\nEach deployment is an object with the following keys:",
         "parameters": [],
         "responses": {
           "200": {
@@ -1533,7 +1592,7 @@
                       "type": "string"
                     },
                     "createdIn": {
-                      "description": "The region where the Build was first created, e.g. sfo1.",
+                      "description": "The region where the Build was first created, e.g. `sfo1`.",
                       "$ref": "#/components/schemas/region"
                     },
                     "deployedTo": {
@@ -1566,7 +1625,7 @@
     "/v5/now/deployments/{id}/files": {
       "get": {
         "operationId": "ListDeploymentFilesV5",
-        "description": "This API allows you to retrieve the file structure of a deployment by supplying its :id in the URL.",
+        "description": "This API allows you to retrieve the file structure of a deployment by supplying its :id in the URL.\n\nThe body will contain entries for each child and directory, coupled with an ID of the file for content download.",
         "parameters": [
           {
             "in": "path",
@@ -1594,7 +1653,7 @@
     "/v5/now/deployments/{id}/files/{fileId}": {
       "get": {
         "operationId": "GetSingleFileContentsV5",
-        "description": "This API allows you to retrieve the file data of a file associated with a deployment by supplying its :id and :fileId in the URL.",
+        "description": "This API allows you to retrieve the file data of a file associated with a deployment by supplying its :id and :fileId in the URL.\n\nThe body will contain the raw content of the file.",
         "parameters": [
           {
             "in": "path",
@@ -1632,7 +1691,7 @@
     "/v6/now/deployments": {
       "post": {
         "operationId": "CreateANewDeploymentV6",
-        "description": "Create a new deployment with all the required and intended data.",
+        "description": "Create a new deployment with all the required and intended data.\n\nBefore creating a deployment, [upload any required files](#endpoints/deployments/upload-deployment-files) when they cannot be posted at once by inlining files.",
         "parameters": [
           {
             "in": "query",
@@ -1667,14 +1726,14 @@
                       "type": "integer"
                     },
                     "regions": {
-                      "description": "The regions the deployment exists in, e.g. sfo1.",
+                      "description": "The regions the deployment exists in, e.g. `sfo1`.",
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/region"
                       }
                     },
                     "routes": {
-                      "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+                      "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example: `[{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }]`.",
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/route"
@@ -1707,7 +1766,7 @@
                       "$ref": "#/components/schemas/date"
                     },
                     "createdIn": {
-                      "description": "The region where the deployment was first created, e.g. sfo1.",
+                      "description": "The region where the deployment was first created, e.g. `sfo1`.",
                       "$ref": "#/components/schemas/region"
                     }
                   },
@@ -1770,21 +1829,21 @@
                     "$ref": "#/components/schemas/key-string-values"
                   },
                   "builds": {
-                    "description": "A list of Build objects used to build sources in a deployment. For example, {[{ \"src\": \"*.php\", \"use\": \"@now/php\" }]}.",
+                    "description": "A list of Build objects used to build sources in a deployment. For example, `{[{ \"src\": \"*.php\", \"use\": \"@now/php\" }]}`.",
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/simple-build"
                     }
                   },
                   "routes": {
-                    "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+                    "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example, `[{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }]`.",
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/route"
                     }
                   },
                   "regions": {
-                    "description": "An array of the regions the deployment should be deployed to. For example, [\"sfo\", \"bru\"].",
+                    "description": "An array of the regions the deployment should be deployed to. For example, `[\"sfo\", \"bru\"]`.",
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/region"
@@ -1829,7 +1888,7 @@
     "/v6/now/deployments/{id}": {
       "delete": {
         "operationId": "DeleteADeploymentV6",
-        "description": "This API allows you to delete a deployment by supplying its :id in the URL.\nYou can obtain the ID, for example, by listing all deployments.",
+        "description": "This API allows you to delete a deployment by supplying its :id in the URL. You can obtain the ID, for example, by [listing all deployments](#endpoints/deployments/get-/now/deployments).",
         "parameters": [
           {
             "in": "path",
@@ -1857,7 +1916,7 @@
       },
       "get": {
         "operationId": "GetASingleDeploymentV6",
-        "description": "This endpoint allows you to retrieve information for a deployment by supplying its :id in the URL.",
+        "description": "This endpoint allows you to retrieve information for a deployment by supplying its :id in the URL.\n\nOne way to obtain a deployment ID is to [list all deployments](#endpoints/deployments/get-/now/deployments).",
         "parameters": [
           {
             "in": "path",
@@ -2003,14 +2062,14 @@
             "type": "integer"
           },
           "regions": {
-            "description": "The regions the deployment exists in, e.g. sfo1.",
+            "description": "The regions the deployment exists in, e.g. `sfo1`.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/region"
             }
           },
           "routes": {
-            "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+            "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example, [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/route"
@@ -2043,7 +2102,7 @@
             "$ref": "#/components/schemas/date"
           },
           "createdIn": {
-            "description": "The region where the deployment was first created, e.g. sfo1.",
+            "description": "The region where the deployment was first created, e.g. `sfo1`.",
             "type": "string"
           }
         },
@@ -2196,7 +2255,7 @@
         }
       },
       "region": {
-        "description": "The name of the region where the instance was running. The region could be any supported region, for example; sfo.",
+        "description": "The name of the region where the instance was running. The region could be any supported region, for example, `sfo`.",
         "type": "string",
         "enum": ["bru1", "gru1", "iad1", "sfo1"]
       },
@@ -2284,7 +2343,7 @@
         }
       },
       "deployment-ready-state": {
-        "description": "The state of the deployment depending on the process of deploying, or if it is ready or in an error state. Possible values are INITIALIZING, ANALYZING, BUILDING, DEPLOYING, READY, or ERROR.",
+        "description": "The state of the deployment depending on the process of deploying, or if it is ready or in an error state. Possible values are `INITIALIZING`, `ANALYZING`, `BUILDING`, `DEPLOYING`, `READY`, or `ERROR`.",
         "type": "string",
         "enum": [
           "INITIALIZING",
