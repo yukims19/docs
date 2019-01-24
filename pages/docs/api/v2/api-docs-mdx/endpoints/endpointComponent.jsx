@@ -41,54 +41,81 @@ let tableHeader = fieldNames => {
 
 /*TODO: need to handle $ref type object -vs- non-object*/
 let tableBody = (properties, requiredFieldArray) => {
-  return (
-    <tbody className="jsx-1134696997 ">
-      {Object.keys(properties).map(key => {
-        let param = properties[key]
-        return (
-          <tr aria-roledescription="row" className="row">
-            <td className="table-cell">
-              <div>
-                <span className="jsx-3894149877">{key}</span>
-              </div>
-            </td>
-            <td className="table-cell">
-              <div>
-                <a href="#api-basics/types" className="jsx-1042203751 ">
-                  <span className="jsx-1042203751">
-                    {/*TODO: Uppercase & nestedRef & correct data type*/}
-                    {param.type
-                      ? param.type
-                      : param['$ref']
-                        ? /*!!!Not sure if the data structure is correct*/
-                          getRefObject(param['$ref']).enum
-                          ? 'Enum'
-                          : getRefObject(param['$ref']).type
-                        : null}
-                  </span>
-                </a>
-              </div>
-            </td>
-            {requiredFieldArray ? (
+  if (properties.type === 'array') {
+    return (
+      <tbody
+        className="jsx-1134696997 "
+        style={{ backgroundColor: '#f44336a1' }}
+      >
+        <tr aria-roledescription="row" className="row">
+          <td className="table-cell">
+            <div>
+              <span className="jsx-3894149877">key_missing</span>
+            </div>
+          </td>
+          <td className="table-cell">
+            <div>
+              <span className="jsx-3894149877">Array</span>
+            </div>
+          </td>
+          <td className="table-cell">
+            <div>
+              <span className="jsx-3894149877">{properties.description}</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    )
+  } else {
+    return (
+      <tbody className="jsx-1134696997 ">
+        {Object.keys(properties).map(key => {
+          let param = properties[key]
+          return (
+            <tr aria-roledescription="row" className="row">
               <td className="table-cell">
-                <div>{requiredFieldArray.includes(key) ? 'Yes' : 'No'}</div>
+                <div>
+                  <span className="jsx-3894149877">{key}</span>
+                </div>
               </td>
-            ) : null}
+              <td className="table-cell">
+                <div>
+                  <a href="#api-basics/types" className="jsx-1042203751 ">
+                    <span className="jsx-1042203751">
+                      {/*TODO: Uppercase & nestedRef & correct data type*/}
+                      {param.type
+                        ? param.type
+                        : param['$ref']
+                          ? /*!!!Not sure if the data structure is correct*/
+                            getRefObject(param['$ref']).enum
+                            ? 'Enum'
+                            : getRefObject(param['$ref']).type
+                          : null}
+                    </span>
+                  </a>
+                </div>
+              </td>
+              {requiredFieldArray ? (
+                <td className="table-cell">
+                  <div>{requiredFieldArray.includes(key) ? 'Yes' : 'No'}</div>
+                </td>
+              ) : null}
 
-            <td className="table-cell">
-              <div>
-                {param.description
-                  ? param.description
-                  : param['$ref']
-                    ? getRefObject(param['$ref']).description
-                    : null}
-              </div>
-            </td>
-          </tr>
-        )
-      })}
-    </tbody>
-  )
+              <td className="table-cell">
+                <div>
+                  {param.description
+                    ? param.description
+                    : param['$ref']
+                      ? getRefObject(param['$ref']).description
+                      : null}
+                </div>
+              </td>
+            </tr>
+          )
+        })}
+      </tbody>
+    )
+  }
 }
 
 const requestTable = schema => (
