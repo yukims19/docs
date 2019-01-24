@@ -1,5 +1,6 @@
 import Endpoint from '~/components/api/endpoint'
 import { GenericLink, HelpLink } from '~/components/text/link'
+
 import spec from './entireSpec.json'
 
 const getRefObject = refPath => {
@@ -10,8 +11,36 @@ const getRefObject = refPath => {
   })
   return object
 }
+const getType = param => {
+  if (param.type) {
+    if (param.type === 'array') {
+      let item
+      if (!!param.items.type) {
+        let rawItem = param.items.type
+        item = rawItem.charAt(0).toUpperCase() + rawItem.slice(1)
+      } else {
+        let pathArray = param.items['$ref'].split('/')
+        let rawItem = pathArray[pathArray.length - 1]
+        item = (rawItem.charAt(0).toUpperCase() + rawItem.slice(1)).replace(
+          /(-)/g,
+          ' '
+        )
+      }
+      return 'List<' + item + '>'
+    } else {
+      return param.type.charAt(0).toUpperCase() + param.type.slice(1)
+    }
+  } else if (param['ref']) {
+    let refObj = getRefObject(param['$ref'])
+    return !!refObj.enum
+      ? 'Enum<' + refObj.enum.join('|') + '>'
+      : refObj.type.charAt(0).toUpperCase() + refObj.type.slice(1)
+  } else {
+    return null
+  }
+}
 
-let tableHeader = fieldNames => {
+const tableHeader = fieldNames => {
   return (
     <thead>
       <tr aria-roledescription="row" className="row">
@@ -39,8 +68,7 @@ let tableHeader = fieldNames => {
   )
 }
 
-/*TODO: need to handle $ref type object -vs- non-object*/
-let tableBody = (properties, requiredFieldArray) => {
+const tableBody = (properties, requiredFieldArray) => {
   if (properties.type === 'array') {
     return (
       <tbody
@@ -81,17 +109,7 @@ let tableBody = (properties, requiredFieldArray) => {
               <td className="table-cell">
                 <div>
                   <a href="#api-basics/types" className="jsx-1042203751 ">
-                    <span className="jsx-1042203751">
-                      {/*TODO: Uppercase & nestedRef & correct data type*/}
-                      {param.type
-                        ? param.type
-                        : param['$ref']
-                          ? /*!!!Not sure if the data structure is correct*/
-                            getRefObject(param['$ref']).enum
-                            ? 'Enum'
-                            : getRefObject(param['$ref']).type
-                          : null}
-                    </span>
+                    <span className="jsx-1042203751">{getType(param)}</span>
                   </a>
                 </div>
               </td>
@@ -212,4 +230,25 @@ const EndpointComponent = ({ method, url }) => {
   return specObj ? component(specObj, method, url) : null
 }
 
-export default EndpointComponent
+const ItemDetail = ({ itemName, description }) => {
+  let item = itemName
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .trim()
+  console.log(item)
+  console.log(spec.components.schemas[item].properties)
+  return (
+    <div>
+      <h4 className="jsx-4140571023 ">{itemName}</h4>
+      {description ? <p>{description}</p> : null}
+      <div className="jsx-4128209634 table-container">
+        <table className="jsx-4128209634 table">
+          {tableHeader(['Key', 'Type', 'Description'])}
+          {tableBody(spec.components.schemas[item].properties)}
+        </table>
+      </div>
+    </div>
+  )
+}
+
+export { EndpointComponent as default, ItemDetail }
