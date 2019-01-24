@@ -1712,6 +1712,30 @@
                     }
                   },
                   "type": "object"
+                },
+                "examples": {
+                  "firstDeployment": {
+                    "summary": "",
+                    "value": {
+                      "id": "dpl_D6FpCMUYdba5bZFJvA46FLBMxM2W",
+                      "url": "my-instant-deployment-3ij3cxz9qr.now.sh",
+                      "name": "my-instant-deployment",
+                      "meta": {},
+                      "plan": "unlimited",
+                      "public": false,
+                      "ownerId": "ZspSRT4ljIEEmMHgoDwKWDei",
+                      "readyState": "READY",
+                      "createdAt": 1540257237129,
+                      "createdIn": "sfo1",
+                      "regions": ["sfo1"],
+                      "builds": [{ "src": "**", "use": "@now/static" }],
+                      "routes": null,
+                      "env": [],
+                      "build": {
+                        "env": []
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1773,6 +1797,28 @@
                 },
                 "required": ["name", "files", "version"],
                 "type": "object"
+              },
+              "examples": {
+                "firstDeployment": {
+                  "summary": "Example First Deployment",
+                  "value": {
+                    "file": "index.html",
+                    "data": "<!doctype html>\n<html>\n  <head>\n    <title>A simple deployment with the Now API!</title>\n  </head>\n  <body>\n    <h1>Welcome to a simple static file</h1>\n    <p>Deployed with <a href=\"https://zeit.co/docs/api\">ZEIT&apos;s Now API</a>!</p>\n    </body>\n</html>"
+                  }
+                },
+                "inlinedFilesDeployment": {
+                  "summary": "Example request with inlined files",
+                  "value": {
+                    "name": "my-instant-deployment",
+                    "version": 2,
+                    "files": [
+                      {
+                        "file": "index.html",
+                        "data": "<!doctype html>\n<html>\n  <head>\n    <title>A simple deployment with the Now API!</title>\n  </head>\n  <body>\n    <h1>Welcome to a simple static file</h1>\n    <p>Deployed with <a href=\"https://zeit.co/docs/api\">ZEIT&apos;s Now API</a>!</p>\n    </body>\n</html>"
+                      }
+                    ]
+                  }
+                }
               }
             }
           },

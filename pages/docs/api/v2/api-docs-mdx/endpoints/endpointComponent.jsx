@@ -1,5 +1,9 @@
 import Endpoint from '~/components/api/endpoint'
-import { GenericLink, HelpLink } from '~/components/text/link'
+import Example from '~/components/example'
+import Request from '~/components/api/request'
+import { Code } from '~/components/text/code'
+import { P } from '~/components/text/paragraph'
+import { HelpLink } from '~/components/text/link'
 
 const capitalize = string => {
   return string.charAt(0).toUpperCase() + string.slice(1)
@@ -205,18 +209,30 @@ const operationIdFriendlyName = operationId =>
     .trim()
 
 const operationDetails = (spec, operation, method, url) => {
+  const contentType = 'application/json'
+
   /* FIXME: Need to normalize the capitalization of operationId */
   const operationFriendlyName = operationIdFriendlyName(operation.operationId)
   const operationAnchor =
     '#endpoints/domains/' + operationFriendlyName.replace(/\s+/g, '-')
 
-  const requestBodySchema =
-    operation.requestBody &&
-    operation.requestBody.content['application/json'].schema
+  const requestBody =
+    operation.requestBody && operation.requestBody.content[contentType]
+
+  const requestBodySchema = requestBody && requestBody.schema
+
+  const successResponseBody =
+    operation.responses[200] && operation.responses[200].content[contentType]
 
   const successResponseBodySchema =
-    operation.responses[200] &&
-    operation.responses[200].content['application/json'].schema
+    successResponseBody && successResponseBody.schema
+
+  const requestExamples = (requestBody && requestBody.examples) || {}
+  const successResponseExamples =
+    (successResponseBody && successResponseBody.examples) || {}
+
+  // FIXME: Where do props come from for examples?
+  const props = {}
 
   return (
     <div style={{ border: '1px solid black' }}>
@@ -227,9 +243,41 @@ const operationDetails = (spec, operation, method, url) => {
       </h3>
       <Endpoint method={method} url={url} />
       <p className="jsx-3121034208">{operation.description}</p>
+
       {requestBodySchema && objectTable('request', spec, requestBodySchema)}
+
       {successResponseBodySchema &&
         objectTable('response', spec, successResponseBodySchema)}
+
+      {Object.keys(requestExamples).map(exampleName => {
+        const exampleRequest = requestExamples[exampleName]
+        const exampleResponse = successResponseExamples[exampleName]
+
+        return (
+          <Example>
+            <span>{exampleRequest.summary}</span>
+            <Request
+              url={`https://api.zeit.co${url}`}
+              method={method.toUpperCase()}
+              headers={{
+                Authorization: `Bearer ${
+                  props.testingToken ? props.testingToken.token : '$TOKEN'
+                }`,
+                'Content-Type': contentType
+              }}
+              body={exampleRequest.value}
+            />
+            {!exampleResponse ? null : (
+              <>
+                <span>{exampleResponse.summary || 'Example response'}:</span>
+                <Code lang="json">
+                  {JSON.stringify(exampleResponse.value, null, 2)}
+                </Code>
+              </>
+            )}
+          </Example>
+        )
+      })}
     </div>
   )
 }
@@ -255,6 +303,9 @@ const ItemDetail = ({ itemName, description }) => {
   )
 }
 
+/* Convert a Zeit-docs style url to the openapi path name, e.g.
+"/v1/teams/:id/members/:userId" => "/v1/teams/{id}/members/{userId}"
+*/
 const zeitUrlPathToOpenapiUrl = url => url.replace(/:(\w+)/g, '{$1}')
 
 const Operation = ({ spec, method, url }) => {
