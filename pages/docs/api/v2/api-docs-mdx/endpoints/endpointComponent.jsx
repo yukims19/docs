@@ -118,42 +118,59 @@ let tableBody = (properties, requiredFieldArray) => {
   }
 }
 
-const requestTable = schema => (
-  <div className="jsx-4128209634 table-container">
-    <table className="jsx-4128209634 table">
-      {tableHeader(['Key', 'Type', 'Required', 'Description'])}
-      {!!schema['$ref']
-        ? tableBody(getRefObject(schema['$ref']).properties, schema.required)
-        : !!schema['properties']
-          ? tableBody(schema['properties'], schema.required)
-          : null}
-    </table>
-  </div>
-)
+const requestTable = schema => {
+  if (
+    (!!schema.properties && Object.keys(schema.properties).length > 0) ||
+    !!schema['$ref'] > 0
+  ) {
+    return (
+      <div>
+        <h4 className="jsx-4140571023 ">Request Parameters</h4>
+        <div className="jsx-4128209634 table-container">
+          <table className="jsx-4128209634 table">
+            {tableHeader(['Key', 'Type', 'Required', 'Description'])}
+            {!!schema['$ref']
+              ? tableBody(
+                  getRefObject(schema['$ref']).properties,
+                  schema.required
+                )
+              : !!schema['properties']
+                ? tableBody(schema['properties'], schema.required)
+                : tableBody(schema)}
+          </table>
+        </div>
+      </div>
+    )
+  } else {
+    return null
+  }
+}
 
-const responseTable = schema => (
-  <div className="jsx-4128209634 table-container">
-    <table className="jsx-4128209634 table">
-      {tableHeader(['Key', 'Type', 'Description'])}
-      {!!schema['$ref']
-        ? tableBody(getRefObject(schema['$ref']).properties)
-        : !!schema['properties']
-          ? tableBody(schema['properties'])
-          : null}
-    </table>
-  </div>
-)
+const responseTable = schema => {
+  if (
+    (!!schema.properties && Object.keys(schema.properties).length) ||
+    !!schema['$ref'] > 0
+  ) {
+    return (
+      <div>
+        <h4 className="jsx-4140571023 ">Response Parameters</h4>
+        <div className="jsx-4128209634 table-container">
+          <table className="jsx-4128209634 table">
+            {tableHeader(['Key', 'Type', 'Description'])}
+            {!!schema['$ref']
+              ? tableBody(getRefObject(schema['$ref']).properties)
+              : !!schema['properties']
+                ? tableBody(schema['properties'])
+                : tableBody(schema)}
+          </table>
+        </div>
+      </div>
+    )
+  } else {
+    return null
+  }
+}
 
-/*
-   !!specObj.responses['200'].content[
-   'application/json'
-   ].schema['properties'] &&
-   Object.keys(
-   specObj.responses['200'].content['application/json'].schema[
-   'properties'
-   ]
-   ) > 0 ?
- */
 const component = (specObj, method, url) => {
   const operationId = specObj.operationId
     .replace(/([A-Z])/g, ' $1')
@@ -174,20 +191,14 @@ const component = (specObj, method, url) => {
       </h3>
       <Endpoint method={method} url={url} />
       <p className="jsx-3121034208">{specObj.description}</p>
-      {!specObj.requestBody ? null : (
-        <div>
-          <h4 className="jsx-4140571023 ">Request Parameters</h4>
-          {requestTable(specObj.requestBody.content['application/json'].schema)}
-        </div>
-      )}
-      {!specObj.responses ? null : (
-        <div>
-          <h4 className="jsx-4140571023 ">Response Parameters</h4>
-          {responseTable(
+      {!specObj.requestBody
+        ? null
+        : requestTable(specObj.requestBody.content['application/json'].schema)}
+      {!specObj.responses
+        ? null
+        : responseTable(
             specObj.responses[200].content['application/json'].schema
           )}
-        </div>
-      )}
     </div>
   )
 }
