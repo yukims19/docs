@@ -1,46 +1,50 @@
 import Endpoint from '~/components/api/endpoint'
 import { GenericLink, HelpLink } from '~/components/text/link'
 
-import spec from './entireSpec.json'
-
-const getRefObject = refPath => {
-  console.log(refPath)
-  let object = spec
-  refPath.split('/').forEach(e => {
-    e === '#' ? null : (object = object[e])
-  })
-  return object
+const capitalize = string => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
-const getType = param => {
-  if (param.type) {
-    if (param.type === 'array') {
+
+const getRefName = ref => {
+  return ref.split('/').pop()
+}
+
+const getRefFriendlyName = ref => {
+  let refName = getRefName(ref)
+  // turn "deployment-ready-state" => "Deployment ready state"
+  return capitalize(refName).replace(/\W+/g, ' ')
+}
+
+const resolveRefObject = (spec, refPath) => {
+  return spec.components.schemas[getRefName(refPath)]
+}
+
+const getType = (spec, schema) => {
+  if (schema.type) {
+    if (schema.type === 'array') {
       let item
-      if (!!param.items.type) {
-        let rawItem = param.items.type
-        item = rawItem.charAt(0).toUpperCase() + rawItem.slice(1)
-      } else {
-        let pathArray = param.items['$ref'].split('/')
-        let rawItem = pathArray[pathArray.length - 1]
-        item = (rawItem.charAt(0).toUpperCase() + rawItem.slice(1)).replace(
-          /(-)/g,
-          ' '
-        )
+      if (!!schema.items.type) {
+        item = capitalize(schema.items.type)
+      } else if (!!schema.items['$ref']) {
+        item = getRefFriendlyName(schema.items['$ref'])
       }
-      return 'List<' + item + '>'
+      return `List<${item}>`
     } else {
-      return param.type.charAt(0).toUpperCase() + param.type.slice(1)
+      return capitalize(schema.type)
     }
-  } else if (param['ref']) {
-    let refObj = getRefObject(param['$ref'])
-    return !!refObj.enum
-      ? 'Enum<' + refObj.enum.join('|') + '>'
-      : refObj.type.charAt(0).toUpperCase() + refObj.type.slice(1)
+  } else if (schema['ref']) {
+    let refSchema = resolveRefObject(spec, schema['$ref'])
+    const isEnum = !!refSchema.enum
+    const enumValues = isEnum ? refSchema.enum.join('|') : []
+    return isEnum ? `Enum<${enumValues}>` : capitalize(refSchema.type)
   } else {
     return null
   }
 }
 
 const tableHeader = fieldNames => {
+  const hasRequiredFields = fieldNames.length === 4
+
   return (
     <thead>
       <tr aria-roledescription="row" className="row">
@@ -55,7 +59,7 @@ const tableHeader = fieldNames => {
             </HelpLink>
           </div>
         </th>
-        {fieldNames.length === 4 ? (
+        {hasRequiredFields ? (
           <th className="head-cell">
             <div> {fieldNames[2]}</div>
           </th>
@@ -68,93 +72,121 @@ const tableHeader = fieldNames => {
   )
 }
 
-const tableBody = (properties, requiredFieldArray) => {
-  if (properties.type === 'array') {
-    return (
-      <tbody
-        className="jsx-1134696997 "
-        style={{ backgroundColor: '#f44336a1' }}
-      >
-        <tr aria-roledescription="row" className="row">
-          <td className="table-cell">
-            <div>
-              <span className="jsx-3894149877">key_missing</span>
-            </div>
-          </td>
-          <td className="table-cell">
-            <div>
-              <span className="jsx-3894149877">Array</span>
-            </div>
-          </td>
-          <td className="table-cell">
-            <div>
-              <span className="jsx-3894149877">{properties.description}</span>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    )
-  } else {
-    return (
-      <tbody className="jsx-1134696997 ">
-        {Object.keys(properties).map(key => {
-          let param = properties[key]
-          return (
-            <tr aria-roledescription="row" className="row">
-              <td className="table-cell">
-                <div>
-                  <span className="jsx-3894149877">{key}</span>
-                </div>
-              </td>
-              <td className="table-cell">
-                <div>
-                  <a href="#api-basics/types" className="jsx-1042203751 ">
-                    <span className="jsx-1042203751">{getType(param)}</span>
-                  </a>
-                </div>
-              </td>
-              {requiredFieldArray ? (
-                <td className="table-cell">
-                  <div>{requiredFieldArray.includes(key) ? 'Yes' : 'No'}</div>
-                </td>
-              ) : null}
+const fixmeRed = '#f44336a1'
 
-              <td className="table-cell">
-                <div>
-                  {param.description
-                    ? param.description
-                    : param['$ref']
-                      ? getRefObject(param['$ref']).description
-                      : null}
-                </div>
-              </td>
-            </tr>
-          )
-        })}
-      </tbody>
-    )
-  }
+const specialCaseListTableBody = schema => {
+  return (
+    <tbody className="jsx-1134696997 " style={{ backgroundColor: fixmeRed }}>
+      <tr aria-roledescription="row" className="row">
+        <td className="table-cell">
+          <div>
+            <span className="jsx-3894149877">key_missing</span>
+          </div>
+        </td>
+        <td className="table-cell">
+          <div>
+            <span className="jsx-3894149877">Array</span>
+          </div>
+        </td>
+        <td className="table-cell">
+          <div>
+            <span className="jsx-3894149877">{schema.description}</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  )
 }
 
-const requestTable = schema => {
-  if (
+const tableBody = (spec, properties, requiredFieldNames) => {
+  return (
+    <tbody className="jsx-1134696997 ">
+      {Object.keys(properties).map(key => {
+        const property = properties[key]
+        const propertyType = getType(spec, property)
+        const propertyDescription = property.description
+          ? property.description
+          : property['$ref']
+          ? resolveRefObject(spec, property['$ref']).description
+          : null
+
+        const requiredColumn = Array.isArray(requiredFieldNames) ? (
+          <td className="table-cell">
+            <div>{requiredFieldNames.includes(key) ? 'Yes' : 'No'}</div>
+          </td>
+        ) : null
+
+        return (
+          <tr aria-roledescription="row" className="row">
+            <td className="table-cell">
+              <div>
+                <span className="jsx-3894149877">{key}</span>
+              </div>
+            </td>
+
+            <td className="table-cell">
+              <div>
+                <a href="#api-basics/types" className="jsx-1042203751 ">
+                  <span className="jsx-1042203751">{propertyType}</span>
+                </a>
+              </div>
+            </td>
+
+            {requiredColumn}
+
+            <td className="table-cell">
+              <div>{propertyDescription}</div>
+            </td>
+          </tr>
+        )
+      })}
+    </tbody>
+  )
+}
+
+const objectTable = (tableType, spec, schema) => {
+  /* Request table type is special cf response/data-component table, it has
+  an additional 'Required' column
+  */
+  const keys =
+    tableType === 'request'
+      ? ['Key', 'Type', 'Required', 'Description']
+      : ['Key', 'Type', 'Description']
+
+  const schemaIsRef = !!schema['$ref']
+  const schemaIsObject =
+    // We have some cases where the schema has properties, but it's an empty object
     (!!schema.properties && Object.keys(schema.properties).length > 0) ||
-    !!schema['$ref'] > 0
-  ) {
+    schemaIsRef
+
+  const schemaObject = schemaIsRef
+    ? resolveRefObject(spec, schema['$ref'])
+    : schema
+
+  /**
+  If the schema is already an object, pluck its properties for rendering a table.
+  If it's a reference, follow it to the actual object and pluck *its* properties
+  */
+  const schemaProperties = schemaObject && schemaObject.properties
+
+  /* Handle the special case where the table is given a non-object type,
+  e.g. the api response has a top-level array returned. These should be 
+  normalized inside the api implementation in the future, and this special-case
+  removed */
+  const isSpecialCase = !schemaProperties
+
+  if (schemaIsObject) {
     return (
       <div>
-        <h4 className="jsx-4140571023 ">Request Parameters</h4>
+        <h4 className="jsx-4140571023 ">{`${capitalize(
+          tableType
+        )} Parameters`}</h4>
         <div className="jsx-4128209634 table-container">
           <table className="jsx-4128209634 table">
-            {tableHeader(['Key', 'Type', 'Required', 'Description'])}
-            {!!schema['$ref']
-              ? tableBody(
-                  getRefObject(schema['$ref']).properties,
-                  schema.required
-                )
-              : !!schema['properties']
-                ? tableBody(schema['properties'], schema.required)
-                : tableBody(schema)}
+            {tableHeader(keys)}
+            {!!isSpecialCase
+              ? specialCaseListTableBody(spec, schema)
+              : tableBody(spec, schemaProperties, schemaObject.required)}
           </table>
         </div>
       </div>
@@ -164,70 +196,42 @@ const requestTable = schema => {
   }
 }
 
-const responseTable = schema => {
-  if (
-    (!!schema.properties && Object.keys(schema.properties).length) ||
-    !!schema['$ref'] > 0
-  ) {
-    return (
-      <div>
-        <h4 className="jsx-4140571023 ">Response Parameters</h4>
-        <div className="jsx-4128209634 table-container">
-          <table className="jsx-4128209634 table">
-            {tableHeader(['Key', 'Type', 'Description'])}
-            {!!schema['$ref']
-              ? tableBody(getRefObject(schema['$ref']).properties)
-              : !!schema['properties']
-                ? tableBody(schema['properties'])
-                : tableBody(schema)}
-          </table>
-        </div>
-      </div>
-    )
-  } else {
-    return null
-  }
-}
-
-const component = (specObj, method, url) => {
-  const operationId = specObj.operationId
+// "  RemoveUserFromTeamV1  " => "remove user from team"
+const operationIdFriendlyName = operationId =>
+  operationId
     .replace(/([A-Z])/g, ' $1')
     .replace(/V[0-9]/g, '')
     .toLowerCase()
     .trim()
 
+const operationDetails = (spec, operation, method, url) => {
+  /* FIXME: Need to normalize the capitalization of operationId */
+  const operationFriendlyName = operationIdFriendlyName(operation.operationId)
+  const operationAnchor =
+    '#endpoints/domains/' + operationFriendlyName.replace(/\s+/g, '-')
+
+  const requestBodySchema =
+    operation.requestBody &&
+    operation.requestBody.content['application/json'].schema
+
+  const successResponseBodySchema =
+    operation.responses[200] &&
+    operation.responses[200].content['application/json'].schema
+
   return (
     <div style={{ border: '1px solid black' }}>
       <h3 className="jsx-2454259911">
-        {/*TODO: Need to define the format of operationId*/}
-        <a
-          href={'#endpoints/domains/' + operationId.replace(/\s+/g, '-')}
-          className="jsx-2892434432"
-        >
-          {operationId.charAt(0).toUpperCase() + operationId.slice(1)}
+        <a href={operationAnchor} className="jsx-2892434432">
+          {capitalize(operationFriendlyName)}
         </a>
       </h3>
       <Endpoint method={method} url={url} />
-      <p className="jsx-3121034208">{specObj.description}</p>
-      {!specObj.requestBody
-        ? null
-        : requestTable(specObj.requestBody.content['application/json'].schema)}
-      {!specObj.responses
-        ? null
-        : responseTable(
-            specObj.responses[200].content['application/json'].schema
-          )}
+      <p className="jsx-3121034208">{operation.description}</p>
+      {requestBodySchema && objectTable('request', spec, requestBodySchema)}
+      {successResponseBodySchema &&
+        objectTable('response', spec, successResponseBodySchema)}
     </div>
   )
-}
-
-const EndpointComponent = ({ method, url }) => {
-  let specUrl = url.replace(/:(\w+)/g, '{$1}')
-  let specObj =
-    spec.paths && spec.paths[specUrl]
-      ? spec.paths[specUrl][method.toLowerCase()]
-      : null
-  return specObj ? component(specObj, method, url) : null
 }
 
 const ItemDetail = ({ itemName, description }) => {
@@ -251,4 +255,22 @@ const ItemDetail = ({ itemName, description }) => {
   )
 }
 
-export { EndpointComponent as default, ItemDetail }
+const zeitUrlPathToOpenapiUrl = url => url.replace(/:(\w+)/g, '{$1}')
+
+const Operation = ({ spec, method, url }) => {
+  const openapiUrl = zeitUrlPathToOpenapiUrl(url)
+  const httpVerb = method.toLowerCase()
+  // pathObj will have http methods as keys in an openapi spec
+  const openapiPathObj = spec.paths && spec.paths[openapiUrl]
+  const operation = openapiPathObj && openapiPathObj[httpVerb]
+
+  return operation ? (
+    operationDetails(spec, operation, method, url)
+  ) : (
+    <h1 style={{ backgroundColor: fixmeRed }}>
+      Missing operation definition for {`${url}.${method}`}
+    </h1>
+  )
+}
+
+export { Operation as default, ItemDetail }

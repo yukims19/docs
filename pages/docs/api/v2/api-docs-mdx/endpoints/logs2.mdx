@@ -4,12 +4,17 @@ import { HelpLink } from '~/components/text/link'
 import Endpoint from '~/components/api/endpoint'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## Logs
 
 ### Get deployment logs
 
-<EndpointComponent method="GET" url="/v2/now/deployments/:id/events" />
+<EndpointComponent
+  spec={spec}
+  method="GET"
+  url="/v2/now/deployments/:id/events"
+/>
 
 ##### Log Object
 

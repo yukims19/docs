@@ -4,12 +4,13 @@ import { HelpLink } from '~/components/text/link'
 import Endpoint from '~/components/api/endpoint'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## Aliases
 
 ### List all the aliases
 
-<EndpointComponent method="GET" url="/v2/now/aliases" />
+<EndpointComponent spec={spec} method="GET" url="/v2/now/aliases" />
 
 #### Deployment
 
@@ -66,7 +67,7 @@ Example successful (**200**) response:
 
 ### Remove an alias
 
-<EndpointComponent method="DELETE" url="/v2/now/aliases/:id" />
+<EndpointComponent spec={spec} method="DELETE" url="/v2/now/aliases/:id" />
 
 <Example>
   <span>Example request:</span>
@@ -90,7 +91,7 @@ Example successful (**200**) response:
 
 ### Purge Alias in Now CDN
 
-<EndpointComponent method="PURGE" url="/v2/now/aliases/:id" />
+<EndpointComponent spec={spec} method="PURGE" url="/v2/now/aliases/:id" />
 
 <Example>
 <span>Example of a <InlineCode>PURGE</InlineCode> request:</span>
@@ -114,7 +115,11 @@ Example of a successful (**200**) response:
 
 ### List aliases by deployment
 
-<EndpointComponent method="GET" url="/v2/now/deployments/:id/aliases" />
+<EndpointComponent
+  spec={spec}
+  method="GET"
+  url="/v2/now/deployments/:id/aliases"
+/>
 
 #### Alias
 
@@ -153,7 +158,11 @@ Example successful (**200**) response:
 
 ### Assign an alias to a deployment
 
-<EndpointComponent method="POST" url="/v2/now/deployments/:id/aliases" />
+<EndpointComponent
+  spec={spec}
+  method="POST"
+  url="/v2/now/deployments/:id/aliases"
+/>
 
 <Example>
   <span>Example request:</span>

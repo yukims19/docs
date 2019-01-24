@@ -5,12 +5,13 @@ import { GenericLink, HelpLink } from '~/components/text/link'
 import { P, PDIV } from '~/components/text/paragraph'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## Deployments
 
 ### Create a New Deployment
 
-<EndpointComponent method="POST" url="/v6/now/deployments" />
+<EndpointComponent spec={spec} method="POST" url="/v6/now/deployments" />
 
 <Example>
 <span>Example request with inlined files:</span>
@@ -261,7 +262,7 @@ To create a new deployment, with a new ID and URL, etc. if nothing has changed w
 
 ### Upload Deployment Files
 
-<EndpointComponent method="POST" url="/v2/now/files" />
+<EndpointComponent spec={spec} method="POST" url="/v2/now/files" />
 
 <Example>
   <span>Example request:</span>
@@ -289,11 +290,11 @@ To create a new deployment, with a new ID and URL, etc. if nothing has changed w
 
 ### List Deployments
 
-<EndpointComponent method="GET" url="/v3/now/deployments" />
+<EndpointComponent spec={spec} method="GET" url="/v3/now/deployments" />
 
 ### Delete a Deployment
 
-<EndpointComponent method="DELETE" url="/v6/now/deployments/:id" />
+<EndpointComponent spec={spec} method="DELETE" url="/v6/now/deployments/:id" />
 
 <Example>
   <PDIV>Example request:</PDIV>
@@ -317,7 +318,11 @@ To create a new deployment, with a new ID and URL, etc. if nothing has changed w
 
 ### List Deployment Files
 
-<EndpointComponent method="GET" url="/v5/now/deployments/:id/files" />
+<EndpointComponent
+  spec={spec}
+  method="GET"
+  url="/v5/now/deployments/:id/files"
+/>
 
 <Example>
   <PDIV>Example request:</PDIV>
@@ -358,7 +363,11 @@ Example successful (**200**) response:
 
 ### Get Single File Contents
 
-<EndpointComponent method="GET" url="/v5/now/deployments/:id/files/:fileId" />
+<EndpointComponent
+  spec={spec}
+  method="GET"
+  url="/v5/now/deployments/:id/files/:fileId"
+/>
 
 <Example>
   <PDIV>Example request:</PDIV>
@@ -388,7 +397,11 @@ Example successful (**200**) response:
 
 ### List Builds
 
-<EndpointComponent method="GET" url="/v5/now/deployments/:id/builds" />
+<EndpointComponent
+  spec={spec}
+  method="GET"
+  url="/v5/now/deployments/:id/builds"
+/>
 
 <Example>
   <span>Example Request:</span>

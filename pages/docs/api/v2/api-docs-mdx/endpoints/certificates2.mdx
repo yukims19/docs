@@ -4,12 +4,13 @@ import { HelpLink } from '~/components/text/link'
 import Endpoint from '~/components/api/endpoint'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## Certificates
 
 ### List all the certificates
 
-<EndpointComponent method="GET" url="/v3/now/certs" />
+<EndpointComponent spec={spec} method="GET" url="/v3/now/certs" />
 
 #### Certificate
 
@@ -52,7 +53,7 @@ Example successful (**200**) response:
 
 ### Get a single certificate
 
-<EndpointComponent method="GET" url="/v3/now/certs/:id" />
+<EndpointComponent spec={spec} method="GET" url="/v3/now/certs/:id" />
 
 <Example>
   <span>Example request:</span>
@@ -79,7 +80,7 @@ Example successful (200) response:
 
 ### Create a new certificate
 
-<EndpointComponent method="POST" url="/v3/now/certs" />
+<EndpointComponent spec={spec} method="POST" url="/v3/now/certs" />
 
 <Example>
   <span>Example request:</span>
@@ -109,7 +110,7 @@ Example successful (**200**) response:
 
 ### Submit a certificate
 
-<EndpointComponent method="PUT" url="/v3/now/certs" />
+<EndpointComponent spec={spec} method="PUT" url="/v3/now/certs" />
 
 <Example>
   <span>Example request:</span>
@@ -139,7 +140,7 @@ Example successful (**200**) response:
 
 ### Delete a certificate
 
-<EndpointComponent method="DELETE" url="/v3/now/certs/:id" />
+<EndpointComponent spec={spec} method="DELETE" url="/v3/now/certs/:id" />
 
 <Example>
   <span>Example request:</span>

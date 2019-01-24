@@ -6,12 +6,13 @@ import { P } from '~/components/text/paragraph'
 import Endpoint from '~/components/api/endpoint'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## Teams
 
 ### Create a team
 
-<EndpointComponent method="POST" url="/v1/teams" />
+<EndpointComponent spec={spec} method="POST" url="/v1/teams" />
 
 <Example>
   <span>Example request:</span>
@@ -39,7 +40,7 @@ Example response:
 
 ### List all your teams
 
-<EndpointComponent method="GET" url="/v1/teams" />
+<EndpointComponent spec={spec} method="GET" url="/v1/teams" />
 
 <Example>
   <span>Example request:</span>
@@ -115,7 +116,7 @@ Example response:
 
 ### Update team information
 
-<EndpointComponent method="PATCH" url="/v1/teams/:id" />
+<EndpointComponent spec={spec} method="PATCH" url="/v1/teams/:id" />
 
 <Example>
   <span>Example request:</span>
@@ -147,7 +148,7 @@ Example response:
 
 ### Get list of team members
 
-<EndpointComponent method="GET" url="/v1/teams/:id/members" />
+<EndpointComponent spec={spec} method="GET" url="/v1/teams/:id/members" />
 
 <Example>
   <span>Example request:</span>
@@ -181,7 +182,7 @@ Example response:
 
 ### Invite user to team
 
-<EndpointComponent method="POST" url="/v1/teams/:id/members" />
+<EndpointComponent spec={spec} method="POST" url="/v1/teams/:id/members" />
 
 <Example>
   <span>Example request:</span>
@@ -210,7 +211,11 @@ Example response:
 
 ### Change user role
 
-<EndpointComponent method="PATCH" url="/v1/teams/:id/members/:userId" />
+<EndpointComponent
+  spec={spec}
+  method="PATCH"
+  url="/v1/teams/:id/members/:userId"
+/>
 
 <Example>
   <span>Example request:</span>
@@ -230,7 +235,11 @@ Example response:
 
 ### Remove user from team
 
-<EndpointComponent method="DELETE" url="/v1/teams/:id/members/:userId" />
+<EndpointComponent
+  spec={spec}
+  method="DELETE"
+  url="/v1/teams/:id/members/:userId"
+/>
 
 <Note>
   You need to be <InlineCode>OWNER</InlineCode> to use it and the user{' '}

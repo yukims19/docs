@@ -4,12 +4,13 @@ import { HelpLink } from '~/components/text/link'
 import Endpoint from '~/components/api/endpoint'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
+import spec from './entireSpec.json'
 
 ## DNS
 
 ### List all the DNS records of a domain
 
-<EndpointComponent method="GET" url="/v2/domains/:domain/records" />
+<EndpointComponent spec={spec} method="GET" url="/v2/domains/:domain/records" />
 
 <Example>
   <span>Example request:</span>
@@ -51,7 +52,11 @@ Example successful (**200**) response:
 
 ### Create a new DNS record
 
-<EndpointComponent method="POST" url="/v2/domains/:domain/records" />
+<EndpointComponent
+  spec={spec}
+  method="POST"
+  url="/v2/domains/:domain/records"
+/>
 
 <Example>
   <span>Example request:</span>
@@ -82,7 +87,11 @@ Example successful (**200**) response:
 
 ### Remove a DNS record
 
-<EndpointComponent method="DELETE" url="/v2/domains/:domain/records/:recId" />
+<EndpointComponent
+  spec={spec}
+  method="DELETE"
+  url="/v2/domains/:domain/records/:recId"
+/>
 
 <Example>
   <span>Example request:</span>
