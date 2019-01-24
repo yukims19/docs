@@ -1,5 +1,53 @@
 import Endpoint from '~/components/api/endpoint'
 import { GenericLink, HelpLink } from '~/components/text/link'
+import { Code, InlineCode } from '~/components/code'
+import H1 from '~/components/text/h1'
+import H2 from '~/components/text/h2'
+import H3 from '~/components/text/h3'
+import H4 from '~/components/text/h4'
+import H5 from '~/components/text/h5'
+import H6 from '~/components/text/h6'
+import { UL, LI } from '~/components/list'
+import { P } from '~/components/text/paragraph'
+import Strong from '~/components/text/strong'
+import Quote from '~/components/text/quote'
+import Markdown from 'react-markdown'
+
+const CodeMarkdown = ({ language, value }) => (
+  <Code lang={language}>{value}</Code>
+)
+
+const Headings = ({ level, children }) => {
+  switch (level) {
+    case 1:
+      // This helps us put the title on above the custom buttons
+      return null
+    case 2:
+      return <H2>{children}</H2>
+    case 3:
+      return <H3>{children}</H3>
+    case 4:
+      return <H4>{children}</H4>
+    case 5:
+      return <H5>{children}</H5>
+    case 6:
+      return <H6>{children}</H6>
+    default:
+      return <p>{children}</p>
+  }
+}
+
+const mdxComponents = {
+  paragraph: P,
+  strong: Strong,
+  list: UL,
+  listItem: LI,
+  heading: Headings,
+  code: CodeMarkdown,
+  inlineCode: InlineCode,
+  link: GenericLink,
+  blockquote: Quote
+}
 
 const capitalize = string => {
   return string.charAt(0).toUpperCase() + string.slice(1)
@@ -107,8 +155,8 @@ const tableBody = (spec, properties, requiredFieldNames) => {
         const propertyDescription = property.description
           ? property.description
           : property['$ref']
-          ? resolveRefObject(spec, property['$ref']).description
-          : null
+            ? resolveRefObject(spec, property['$ref']).description
+            : null
 
         const requiredColumn = Array.isArray(requiredFieldNames) ? (
           <td className="table-cell">
@@ -170,7 +218,7 @@ const objectTable = (tableType, spec, schema) => {
   const schemaProperties = schemaObject && schemaObject.properties
 
   /* Handle the special case where the table is given a non-object type,
-  e.g. the api response has a top-level array returned. These should be 
+  e.g. the api response has a top-level array returned. These should be
   normalized inside the api implementation in the future, and this special-case
   removed */
   const isSpecialCase = !schemaProperties
@@ -226,7 +274,7 @@ const operationDetails = (spec, operation, method, url) => {
         </a>
       </h3>
       <Endpoint method={method} url={url} />
-      <p className="jsx-3121034208">{operation.description}</p>
+      <Markdown source={operation.description} renderers={mdxComponents} />
       {requestBodySchema && objectTable('request', spec, requestBodySchema)}
       {successResponseBodySchema &&
         objectTable('response', spec, successResponseBodySchema)}
