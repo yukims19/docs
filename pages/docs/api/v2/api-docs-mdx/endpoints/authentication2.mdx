@@ -1,0 +1,74 @@
+import Example from '~/components/example'
+import { Code } from '~/components/text/code'
+import { HelpLink } from '~/components/text/link'
+import Endpoint from '~/components/api/endpoint'
+import Request from '~/components/api/request'
+
+## Authentication
+
+### Request a login
+
+<Endpoint method="POST" url="/now/registration" />
+
+Request a new login for an user to get a token.
+
+#### Request Parameters
+
+| Key           | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Required | Description                                                                                                         |
+| ------------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| **email**     | <HelpLink href="#api-basics/types">String</HelpLink>       | Yes      | The user email.                                                                                                     |
+| **tokenName** | <HelpLink href="#api-basics/types">String</HelpLink>       | Yes      | The desired name for the token. It will be displayed on the [user account details](https://zeit.co/account/tokens). |
+
+#### Response Parameters
+
+| Key              | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Description                                                                                                                          |
+| ---------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **token**        | <HelpLink href="#api-basics/types">String</HelpLink>       | The token used to verify the user accepted the login request.                                                                        |
+| **securityCode** | <HelpLink href="#api-basics/types">String</HelpLink>       | The code the user is going to receive on the email. **Must** be displayed to the user so they can verify the request is the correct. |
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="POST"
+  url="https://api.zeit.co/now/registration"
+  headers={{
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    email: 'user@mail.com',
+    tokenName: 'Your Client App Name'
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "token": "T1dmvPu36nmyYisXAs7IRzcR",
+  "securityCode": "Practical Saola"
+}`}</Code>
+</Example>
+
+### Verify login
+
+<Endpoint method="GET" url="/now/registration/verify?email&token" />
+
+Verify the user accepted the login request and get a authentication token. The user email address and the token received after [requesting the login](#endpoints/authentication/request-a-login) must be added to the URL as a query string with the names `email` and `token`.
+
+#### Response Parameters
+
+| Key       | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Description                                                                                                          |
+| --------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **token** | <HelpLink href="#api-basics/types">String</HelpLink>       | The user authentication token you can use as described in [API Basics - Authentication](#api-basics/authentication). |
+
+<Example>
+  <span>Example request:</span>
+
+<Request url="https://api.zeit.co/now/registration/verify?email=user@mail.com&token=T1dmvPu36nmyYisXAs7IRzcR" />
+
+Example response:
+
+<Code lang="json">{`{
+  "token": "sGkHhSH98wtJB0lyODZJ2bRe"
+}`}</Code>
+</Example>

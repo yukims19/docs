@@ -1,0 +1,149 @@
+import Example from '~/components/example'
+import { Code } from '~/components/text/code'
+import { HelpLink } from '~/components/text/link'
+import Endpoint from '~/components/api/endpoint'
+import Request from '~/components/api/request'
+import EndpointComponent from './endpointComponent.jsx'
+
+## Logs
+
+### Get deployment logs
+
+<EndpointComponent method="GET" url="/v2/now/deployments/:id/events" />
+
+##### Log Object
+
+| Key              | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Description                                                                                                          |
+| ---------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **object**       | <HelpLink href="#api-basics/types">Map</HelpLink>          | The log content as a map.                                                                                            |
+| **text**         | <HelpLink href="#api-basics/types">String</HelpLink>       | The log content as a string.                                                                                         |
+| **deploymentId** | <HelpLink href="#api-basics/types">ID</HelpLink>           | The unique identifier of the deployment.                                                                             |
+| **id**           | <HelpLink href="#api-basics/types">ID</HelpLink>           | The unique identifier of the log.                                                                                    |
+| **context**      | <HelpLink href="#api-basics/types">String</HelpLink>       |                                                                                                                      |
+| **created**      | <HelpLink href="#api-basics/types">Date</HelpLink>         | The date when the log was created.                                                                                   |
+| **serial**       | <HelpLink href="#api-basics/types">Integer</HelpLink>      |                                                                                                                      |
+| **type**         | <HelpLink href="#api-basics/types">Enum</HelpLink>         | The type of log. The type could be `request`, `response`, `command` or `stdout`.                                     |
+| **pid**          | <HelpLink href="#api-basics/types">ID</HelpLink>           | The process unique identified which created the log.                                                                 |
+| **appName**      | <HelpLink href="#api-basics/types">String</HelpLink>       | The deployment application name.                                                                                     |
+| **date**         | <HelpLink href="#api-basics/types">Date</HelpLink>         | The date when the log was created.                                                                                   |
+| **region**       | <HelpLink href="#api-basics/types">Enum</HelpLink>         | The name of the region where the instance was running. The region could be any supported region, for example; `sfo`. |
+
+##### Log Object Key
+
+These are the usual keys of the key `object` of the logs.
+
+| Key               | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Description                                                                          |
+| ----------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **method**        | <HelpLink href="#api-basics/types">String</HelpLink>       | A valid HTTP method.                                                                 |
+| **uri**           | <HelpLink href="#api-basics/types">String</HelpLink>       | The URL which received the request.                                                  |
+| **status**        | <HelpLink href="#api-basics/types">String</HelpLink>       | A valid [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). |
+| **protocol**      | <HelpLink href="#api-basics/types">String</HelpLink>       | The protocol used for the log.                                                       |
+| **bodyBytesSent** | <HelpLink href="#api-basics/types">String</HelpLink>       | The number of bytes sent in the body of the response.                                |
+| **remoteAddr**    | <HelpLink href="#api-basics/types">String</HelpLink>       | The IP address which sent the request.                                               |
+| **userAgent**     | <HelpLink href="#api-basics/types">String</HelpLink>       | The user agent of the device which sent the request.                                 |
+
+#### Types
+
+These are the possible types of logs and what they mean.
+
+| Type         | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| **request**  | The log is an HTTP request.                           |
+| **response** | The log is an HTTP response.                          |
+| **command**  | The log is a terminal command, e.g. `npm start`.      |
+| **stdout**   | The log is anything the application wrote to console. |
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v2/now/deployments/Cm6WigEH9EBI4Uzs2WA6qOGe/events"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "logs": [
+    {
+      "id": "log_EEQs4oPeDT3mK6qVDCg53xOA",
+      "type": "command",
+      "text": "npm install",
+      "instanceId": "",
+      "date": "2017-09-04T17:42:54.129Z",
+      "created": "2017-09-04T17:42:54.207Z",
+      "pid": "6268645745692858883",
+      "serial": "150454697412962686457456928588830000000000000000000",
+      "region": "now-sfo",
+      "deploymentId": "Cm6WigEH9EBI4Uzs2WA6qOGe",
+      "appName": "now-redirect"
+    },
+    {
+      "id": "log_MABiQaH5ZQtsGldYCm2RnFna",
+      "type": "command",
+      "text": "npm start",
+      "instanceId": "",
+      "date": "2017-09-04T17:42:56.169Z",
+      "created": "2017-09-04T17:42:56.248Z",
+      "pid": "4858500117945524255",
+      "serial": "150454697616948585001179455242550000000000000000000",
+      "region": "now-sfo",
+      "deploymentId": "Cm6WigEH9EBI4Uzs2WA6qOGe",
+      "appName": "now-redirect"
+    },
+    {
+      "id": "log_vGDj96qvUoG8fEJCjcFleRfk",
+      "type": "stdout",
+      "text": "\\n> now-redirect@1.0.0 start /home/nowuser/src\\n> node server.js\\n",
+      "instanceId": "996f12b74403b51f62310d82",
+      "date": "2017-09-04T17:42:57.209Z",
+      "created": "2017-09-04T17:42:57.236Z",
+      "pid": "4858500117945524255",
+      "serial": "150454697720948585001179455242550000000000000000001",
+      "region": "now-sfo",
+      "deploymentId": "Cm6WigEH9EBI4Uzs2WA6qOGe",
+      "appName": "now-redirect"
+    },
+    {
+      "object": {
+        "method": "GET",
+        "uri": "/",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
+        "remoteAddr": "181.67.7.237",
+        "protocol": "HTTP/2.0"
+      },
+      "deploymentId": "Cm6WigEH9EBI4Uzs2WA6qOGe",
+      "id": "log_DZlBA1IeSdfezFy962gURCpf",
+      "context": "9HrrSAr7bqUz3V7aVcsbyYT3",
+      "created": "2017-09-04T17:42:59.212Z",
+      "serial": "150454697921258192117963931524070000000000000705393",
+      "type": "request",
+      "pid": "5819211796393152407",
+      "appName": "now-redirect",
+      "date": "2017-09-04T17:42:59.212Z"
+    },
+    {
+      "object": {
+        "method": "GET",
+        "uri": "/",
+        "status": "301",
+        "protocol": "HTTP/2.0",
+        "bodyBytesSent": "79"
+      },
+      "deploymentId": "Cm6WigEH9EBI4Uzs2WA6qOGe",
+      "id": "log_tw8g2Xu2AEVp2H4u7FJc05NB",
+      "context": "9HrrSAr7bqUz3V7aVcsbyYT3",
+      "created": "2017-09-04T17:42:59.233Z",
+      "serial": "150454697923358192117963931524070000000000000705395",
+      "type": "response",
+      "pid": "5819211796393152407",
+      "appName": "now-redirect",
+      "date": "2017-09-04T17:42:59.233Z"
+    }
+  ]
+}`}</Code>
+</Example>

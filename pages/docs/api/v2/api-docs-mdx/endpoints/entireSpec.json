@@ -1,0 +1,2421 @@
+{
+  "servers": [
+    {
+      "url": "https://api.zeit.co"
+    }
+  ],
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Zeit",
+    "version": "v2",
+    "x-providerName": "zeit.co",
+    "x-logo": {
+      "url": "https://logo-core.clearbit.com/zeit.co"
+    }
+  },
+  "externalDocs": {
+    "url": "https://zeit.co/docs/api/"
+  },
+  "paths": {
+    "/now/registration": {
+      "post": {
+        "operationId": "RequestALogin",
+        "description": "Request a new login for an user to get a token.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "token": {
+                      "description": "The token used to verify the user accepted the login request.",
+                      "type": "string"
+                    },
+                    "securityCode": {
+                      "description": "The code the user is going to receive on the email. Must be displayed to the user so he can verify the request is the correct.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "description": "The user email.",
+                    "type": "string"
+                  },
+                  "tokenName": {
+                    "description": "The desired name for the token. It will be displayed on the user account details.",
+                    "type": "string"
+                  }
+                },
+                "required": ["email", "tokenName"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/now/registration/verify": {
+      "get": {
+        "operationId": "VerifyLogin",
+        "description": "Verify the user accepted the login request and get a authentication token. The user email address and the token received after requesting the login must be added to the URL as a query string with the names email and token.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "token": {
+                      "description": "The user authentication token you can use as described in API Basics - Authentication.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams": {
+      "get": {
+        "operationId": "ListAllYourTeamsV1",
+        "description": "Get a list of all the team you belong to.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "teams": {
+                      "description": "The list of each team member as described on Get single team information.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/team"
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateATeamV1",
+        "description": "Create a new team under your account. You need to send a POST request with the desired team slug.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "slug": {
+                    "description": "The desired slug for the team.",
+                    "type": "string"
+                  }
+                },
+                "required": ["slug"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v1/teams/{id}": {
+      "patch": {
+        "operationId": "UpdateTeamInformationV1",
+        "description": "Update the information of the team defined with the id. You need to send a PATCH request with a body containing the information you want to change.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "slug": {
+                    "description": "The new team slug.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The new team name.",
+                    "type": "string"
+                  }
+                },
+                "required": ["slug", "name"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "GetSingleTeamInformationV1",
+        "description": "Get the information of a specific team, it could be used either passing the :id in the URL or the team slug as a query parameter.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/team"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/members": {
+      "post": {
+        "operationId": "InviteUserToTeamV1",
+        "description": "Invite a user to join the team specified in the URL. To use it send a POST request with the user email in the body.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The ID of the invited user.",
+                      "type": "string"
+                    },
+                    "username": {
+                      "description": "The username of the invited user.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "description": "The email address of the user to invite.",
+                    "type": "string"
+                  }
+                },
+                "required": ["email"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "GetListOfTeamMembersV1",
+        "description": "Get the list of team members of the team defined in the URL. The response is a list of maps with the following format.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The team member unique identifier.",
+                      "type": "string"
+                    },
+                    "role": {
+                      "$ref": "#/components/schemas/role"
+                    },
+                    "email": {
+                      "description": "The email address of the team member.",
+                      "type": "string"
+                    },
+                    "username": {
+                      "description": "The username of the team member.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/teams/{id}/members/{userId}": {
+      "delete": {
+        "operationId": "RemoveUserFromTeamV1",
+        "description": "Remove the specified user from a team.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "ChangeUserRoleV1",
+        "description": "Change the role of an user inside a team member. To change it send a PATCH request, if the change is done you will receive a 200 status code with an empty body.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "role": {
+                    "description": "The new role of the team member, it could be OWNER or MEMBER.",
+                    "type": "string",
+                    "enum": [""]
+                  }
+                },
+                "required": ["role"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v2/domains": {
+      "post": {
+        "operationId": "AddANewDomainV2",
+        "description": "Register a new domain name with Now for the authenticating\nuser. The field serviceType selects whether the domains are going to use\nzeit.world DNS or an external nameserver. In the latter case a CNAME/ALIAS\nrecord(s) are expected to point towards alias.zeit.co.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the domain.",
+                      "type": "string"
+                    },
+                    "verified": {
+                      "description": "If the domain has the ownership verified.",
+                      "type": "boolean"
+                    },
+                    "verifyToken": {
+                      "description": "The token required to verify the ownership of an external domain.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the new domain was created.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The domain name you want to add.",
+                    "type": "string"
+                  },
+                  "serviceType": {
+                    "description": "The field serviceType selects whether the domains is going to use zeit.world DNS or an external nameserver. In the latter case a CNAME/ALIAS record(s) are expected to point towards alias.zeit.co.",
+                    "$ref": "#/components/schemas/service-type"
+                  }
+                },
+                "required": ["name"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "ListAllTheDomainsV2",
+        "description": "Retrieves a list of domains registered for the authenticating user. The domain property isExternal is a boolean value telling whether an external nameserver is used to manage DNS records for the domain.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/domain-list"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/domains/buy": {
+      "post": {
+        "operationId": "PurchaseADomainV2",
+        "description": "Purchase the specified domain, it receive the domain name as the key name inside the request body.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The domain name to purchase.",
+                    "type": "string"
+                  },
+                  "expectedPrice": {
+                    "description": "The price you expect to be charged for the purchase.",
+                    "type": "integer"
+                  }
+                },
+                "required": ["name"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v2/domains/price": {
+      "get": {
+        "operationId": "CheckThePriceOfADomainV2",
+        "description": "Check the price to purchase a domain and how long a single purchase period is. The response is a JSON with the key price as a number (always an integer) and a key period as a number indicating the number of years the domains could be held before paying again.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "price": {
+                      "description": "The domain price.",
+                      "type": "integer"
+                    },
+                    "period": {
+                      "description": "The time period by which the domain is purchased.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/domains/status": {
+      "get": {
+        "operationId": "CheckADomainAvailabilityV2",
+        "description": "Check if a domain name may be available to buy or not. The response is a JSON with the key available as a boolean.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "available": {
+                      "description": "If the domain is available or not.",
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/domains/{domain}/records": {
+      "post": {
+        "operationId": "CreateANewDnsRecordV2",
+        "description": "Create a DNS record for a domain specified in the URL. mxPriority\nfield should be set for MX records and left out otherwise.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique ID of the DNS record. Always prepended with rec_.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The subdomain which we're configuring or @ for the domain itself.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of record, it could be any valid DNS record.",
+                    "type": "string",
+                    "enum": [""]
+                  },
+                  "value": {
+                    "description": "The record value.",
+                    "type": "string"
+                  },
+                  "mxPriority": {
+                    "description": "The priority for MX records, is only required if the record type is MX.",
+                    "type": "integer"
+                  }
+                },
+                "required": ["name", "type", "value"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "ListAllTheDnsRecordsOfADomainV2",
+        "description": "Get a list of DNS records created for a domain name specified in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "description": "The unique ID of the DNS record. Always prepended with rec_.",
+                      "type": "string"
+                    },
+                    "type": {
+                      "$ref": "#/components/schemas/dns-record-type"
+                    },
+                    "name": {
+                      "description": "The subdomain which we're configuring or @ for the domain itself.",
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "The record value.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "A timestamp with the date when the record was created.",
+                      "type": "string"
+                    },
+                    "updated": {
+                      "description": "A timestamp with the date when we created the deployment.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/domains/{domain}/records/{recId}": {
+      "delete": {
+        "operationId": "RemoveADnsRecordV2",
+        "description": "Delete a DNS record created for a domain name, where both the domain\nand the record ID are specified in the URL. If the record was removed\nsuccessfully the endpoint returns with code 200 and an empty body.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "recId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/domains/{name}": {
+      "delete": {
+        "operationId": "RemoveADomainByNameV2",
+        "description": "Delete a previously registered domain name from Now.\nDeleting a domain will automatically remove any associated aliases.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique ID of the removed domain.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/aliases": {
+      "get": {
+        "operationId": "ListAllTheAliasesV2",
+        "description": "Retrieves all of the active aliases for the authenticated user.\nThe body will contain an entry for each alias.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the alias.",
+                      "type": "string"
+                    },
+                    "alias": {
+                      "description": "The alias name, it could be a .now.sh subdomain or a custom domain.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the alias was created.",
+                      "type": "integer"
+                    },
+                    "deployment": {
+                      "description": "A map with the deployment ID and URL.",
+                      "$ref": "#/components/schemas/deployment"
+                    },
+                    "deploymentId": {
+                      "description": "The deployment ID.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/aliases/{id}": {
+      "delete": {
+        "operationId": "RemoveAnAliasV2",
+        "description": "The API allows you to delete an alias by supplying the alias :id in the url.\nYou can obtain this id from the list of aliases.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "description": "If the alias was successfully removed.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "purge": {
+        "operationId": "PurgeAliasInNowCdnV2",
+        "description": "Purges the CDN of content from the given alias via :id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "description": "The status of the purge request. The value should be REQUESTED.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/deployments/{id}/aliases": {
+      "post": {
+        "operationId": "AssignAnAliasToADeploymentV2",
+        "description": "Creates a new alias for the deployment with the given :id. The authenticated user must own this deployment.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "oldID": {
+                      "description": "The unique identifier of the previously aliased deployment, only received when the alias was used before.",
+                      "type": "string"
+                    },
+                    "uid": {
+                      "description": "The unique identifier of the alias.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the alias was created.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "alias": {
+                    "description": "The alias we want to assign to the deployment defined in the URL.",
+                    "type": "string"
+                  }
+                },
+                "required": ["alias"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "ListAliasesByDeploymentV2",
+        "description": "Retrieves all of the aliases for the deployment with the given :id.\nThe authenticating user must own this deployment.\nThe body will contain an entry for each alias.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "aliases": {
+                      "description": "A list of the aliases assigned to the deployment.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/alias"
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/deployments/{id}/events": {
+      "get": {
+        "operationId": "GetDeploymentLogsV2",
+        "description": "Get the logs of a deployment by its ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "The list of objects representing each log.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/log-object-real"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/files": {
+      "post": {
+        "operationId": "UploadDeploymentFilesV2",
+        "description": "Before you create a deployment you need to upload the required files for that deployment. To do it you need to POST each file to this endpoint, after that's completed you'll need to POST to create a new deployment.",
+        "parameters": [
+          {
+            "description": "The file size in bytes.",
+            "in": "header",
+            "name": "Content-Length",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The file SHA1 used to check the integrity.",
+            "in": "header",
+            "name": "x-now-digest",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/secrets": {
+      "post": {
+        "operationId": "CreateANewSecretV2",
+        "description": "Creates a new secret. The body should contain name and value strings.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the secret. Always prepended with sec_.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "The name of the secret.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the secret was created.",
+                      "type": "integer"
+                    },
+                    "userId": {
+                      "description": "The unique identifier of the user who created the secret.",
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "A map with the value of the secret.",
+                      "$ref": "#/components/schemas/secret-value"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The name of the secret (max 100 characters).",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "The value of the new secret.",
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "value"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "ListAllTheSecretsV2",
+        "description": "Retrieves all of the active now secrets for the authenticating user.\nThe body will contain an entry for each secret.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "secrets": {
+                      "description": "The list of active secrets.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/secret"
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/now/secrets/{name}": {
+      "delete": {
+        "operationId": "DeleteASecretV2",
+        "description": "This deletes the user's secret defined in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the secret. Always prepended with sec_.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "The name of the secret.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the secret was created.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "ChangeSecretNameV2",
+        "description": "This endpoint provides an opportunity to edit the name\nof a user's secret. The name has to be unique to that user's secrets.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the secret. Always prepended with sec_.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "The new name of the secret.",
+                      "type": "string"
+                    },
+                    "created": {
+                      "description": "The date when the secret was created.",
+                      "type": "integer"
+                    },
+                    "oldName": {
+                      "description": "The old name of the secret.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The new name of the secret.",
+                    "type": "string"
+                  }
+                },
+                "required": ["name"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v3/now/certs": {
+      "put": {
+        "operationId": "SubmitACertificateV3",
+        "description": "Create a new certificate entry with a user-supplied certificate.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "created_at": {
+                      "description": "The date when the certificate was created.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ca": {
+                    "description": "PEM formatted CA chain.",
+                    "type": "string"
+                  },
+                  "cert": {
+                    "description": "PEM formatted certificate.",
+                    "type": "string"
+                  },
+                  "key": {
+                    "description": "PEM formatted private key.",
+                    "type": "string"
+                  }
+                },
+                "required": ["ca", "cert", "key"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "post": {
+        "operationId": "CreateANewCertificateV3",
+        "description": "Issues and stores a new certificate for the common names given in\nthe body using Let's Encrypt.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the issued certificate.",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "description": "The date when the certificate was created.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "domains": {
+                    "description": "A list of Common Names for which the certificate is being provisioned.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["domains"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "get": {
+        "operationId": "ListAllTheCertificatesV3",
+        "description": "Retrieves a list of certificates issued for the authenticating user or\ninformation about the certificate issued for the common name specified in the URL.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "certs": {
+                      "description": "The list of issued certificates.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/certificate"
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/now/certs/{id}": {
+      "delete": {
+        "operationId": "DeleteACertificateV3",
+        "description": "Delete an existing certificate entry. If the certificate entry was\nremoved successfully the endpoint will return with code 200 and\nan empty body; Otherwise an error object is returned.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetASingleCertificateV3",
+        "description": "Retrieves the information about the certificate issued for\ncertificate id specified in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "uid": {
+                      "description": "The unique identifier of the certificate.",
+                      "type": "string"
+                    },
+                    "cns": {
+                      "description": "The common names for which domain the certificate was issued.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "created": {
+                      "description": "The date when the certificate was created.",
+                      "type": "integer"
+                    },
+                    "expiration": {
+                      "description": "The date when the certificate is going to expire.",
+                      "type": "integer"
+                    },
+                    "autoRenew": {
+                      "description": "If the certificate is going to be automatically renewed.",
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/now/deployments": {
+      "get": {
+        "operationId": "ListDeploymentsV3",
+        "description": "List all the deployments under the account corresponding to the API token.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/deployment-list"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v5/now/deployments/{id}/builds": {
+      "get": {
+        "operationId": "ListBuildsV5",
+        "description": "This endpoint retrieves a list of Build objects by supplying its :id in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "description": "The unique ID of the Build.",
+                      "type": "string"
+                    },
+                    "use": {
+                      "description": "The Builder the Build used to generate the output.",
+                      "type": "string"
+                    },
+                    "createdIn": {
+                      "description": "The region where the Build was first created, e.g. sfo1.",
+                      "$ref": "#/components/schemas/region"
+                    },
+                    "deployedTo": {
+                      "description": "The regions where the Build Output was finally deployed to after the build step.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/region"
+                      }
+                    },
+                    "readyState": {
+                      "$ref": "#/components/schemas/deployment-ready-state"
+                    },
+                    "readyStateAt": {
+                      "description": "The time at which the Build state was last modified.",
+                      "type": "integer"
+                    },
+                    "path": {
+                      "description": "The path of files the Build is assigned to.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v5/now/deployments/{id}/files": {
+      "get": {
+        "operationId": "ListDeploymentFilesV5",
+        "description": "This API allows you to retrieve the file structure of a deployment by supplying its :id in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/file"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v5/now/deployments/{id}/files/{fileId}": {
+      "get": {
+        "operationId": "GetSingleFileContentsV5",
+        "description": "This API allows you to retrieve the file data of a file associated with a deployment by supplying its :id and :fileId in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v6/now/deployments": {
+      "post": {
+        "operationId": "CreateANewDeploymentV6",
+        "description": "Create a new deployment with all the required and intended data.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "forceNew",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "description": "A String holding the unique ID of the deployment.",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "A string with the unique URL of the deployment. If it hasn't finished uploading (is incomplete), the value will be null.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "The name of the deployment.",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "The Now platform version the deployment is associated to.",
+                      "type": "integer"
+                    },
+                    "regions": {
+                      "description": "The regions the deployment exists in, e.g. sfo1.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/region"
+                      }
+                    },
+                    "routes": {
+                      "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/route"
+                      }
+                    },
+                    "builds": {
+                      "description": "A list of objects containing the Builds for a particular set of sources in the deployment. Each object contains a src and use describing the sources files that use Builds in the deployment.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/simple-build"
+                      }
+                    },
+                    "plan": {
+                      "description": "The pricing plan the deployment was made under.",
+                      "type": "string"
+                    },
+                    "public": {
+                      "description": "A Boolean representing if the deployment is public or not. By default this is false.",
+                      "type": "boolean"
+                    },
+                    "ownerId": {
+                      "description": "The unique ID of the user or team the deployment belongs to.",
+                      "type": "string"
+                    },
+                    "readyState": {
+                      "$ref": "#/components/schemas/deployment-ready-state"
+                    },
+                    "createdAt": {
+                      "description": "A number containing the date when the deployment was created in milliseconds.",
+                      "type": "integer"
+                    },
+                    "createdIn": {
+                      "description": "The region where the deployment was first created, e.g. sfo1.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "A string with the project name used in the deployment URL. The name string has a max length of 52 characters.",
+                    "type": "string"
+                  },
+                  "files": {
+                    "description": "A list of objects with the files to be deployed.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/inlined-file"
+                    }
+                  },
+                  "version": {
+                    "description": "The version of Now Platform to use. Must have the value of 2.",
+                    "type": "integer"
+                  },
+                  "env": {
+                    "description": "An object containing the deployment's environment variable names and values. Secrets can be referenced by prefixing the value with @.",
+                    "$ref": "#/components/schemas/key-string-values"
+                  },
+                  "build.env": {
+                    "description": "An object containing the deployment's environment variable names and values to be passed to Builds. Secrets can be referenced by prefixing the value with @.",
+                    "$ref": "#/components/schemas/key-string-values"
+                  },
+                  "builds": {
+                    "description": "A list of Build objects used to build sources in a deployment. For example, {[{ \"src\": \"*.php\", \"use\": \"@now/php\" }]}.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/simple-build"
+                    }
+                  },
+                  "routes": {
+                    "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/route"
+                    }
+                  },
+                  "regions": {
+                    "description": "An array of the regions the deployment should be deployed to. For example, [\"sfo\", \"bru\"].",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/region"
+                    }
+                  },
+                  "public": {
+                    "description": "Whether a deployment's source and logs are available publically.",
+                    "type": "boolean"
+                  }
+                },
+                "required": ["name", "files", "version"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/v6/now/deployments/{id}": {
+      "delete": {
+        "operationId": "DeleteADeploymentV6",
+        "description": "This API allows you to delete a deployment by supplying its :id in the URL.\nYou can obtain the ID, for example, by listing all deployments.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "",
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetASingleDeploymentV6",
+        "description": "This endpoint allows you to retrieve information for a deployment by supplying its :id in the URL.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/deployment-full"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "alias": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "description": "The unique identifier of the alias.",
+            "type": "string"
+          },
+          "alias": {
+            "description": "The alias name, it could be a `.now.sh` subdomain or a custom domain.",
+            "type": "string"
+          },
+          "created": {
+            "description": "The date when the alias was created.",
+            "type": "string"
+          }
+        }
+      },
+      "simple-build": {
+        "description": "An object describing the sources files that use Builds in the deployment.",
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "use": {
+            "type": "string"
+          }
+        },
+        "required": ["src", "use"]
+      },
+      "certificate": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "description": "The unique identifier of the certificate.",
+            "type": "string"
+          },
+          "cns": {
+            "description": "The common names for which domain the certificate was issued.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created": {
+            "description": "The date when the certificate was created.",
+            "type": "integer"
+          },
+          "expiration": {
+            "description": "The date when the certificate is going to expire.",
+            "type": "integer"
+          },
+          "autoRenew": {
+            "description": "If the certificate is going to be automatically renewed.",
+            "type": "boolean"
+          }
+        }
+      },
+      "deployment": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "description": "The deployment unique identifier.",
+            "type": "string"
+          },
+          "url": {
+            "description": "The deployment unique URL.",
+            "type": "string"
+          }
+        }
+      },
+      "deployment-list": {
+        "properties": {
+          "uid": {
+            "description": "A string with the unique deployment ID you can use to get more information or remove it.",
+            "type": "string"
+          },
+          "name": {
+            "description": "A string with the deployment under which the deployment was created.",
+            "type": "string"
+          },
+          "url": {
+            "description": "A string with the unique URL of the deployment. If it hasn't finished uploading (is incomplete), the value will be null.",
+            "type": "string"
+          },
+          "created": {
+            "description": "A number containing the date when the deployment was created (in timestamp).",
+            "type": "integer"
+          },
+          "creator": {
+            "description": "A map with the ID of the user who created the deployment.",
+            "$ref": "#/components/schemas/creator-id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/deployment-ready-state"
+          }
+        },
+        "type": "object"
+      },
+      "deployment-full": {
+        "properties": {
+          "id": {
+            "description": "A String holding the unique ID of the deployment.",
+            "type": "string"
+          },
+          "url": {
+            "description": "A string with the unique URL of the deployment. If it hasn't finished uploading (is incomplete), the value will be null.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the deployment.",
+            "type": "string"
+          },
+          "version": {
+            "description": "The Now platform version the deployment is associated with.",
+            "type": "integer"
+          },
+          "regions": {
+            "description": "The regions the deployment exists in, e.g. sfo1.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/region"
+            }
+          },
+          "routes": {
+            "description": "A list of routes objects used to rewrite paths to point towards other internal or external paths. For example; [{ \"src\": \"/docs\", \"dest\": \"https://docs.zeit.co\" }].",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/route"
+            }
+          },
+          "builds": {
+            "description": "A list of objects containing the Builds for a particular set of sources in the deployment. Each object contains a src and use describing the sources files that use Builds in the deployment.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/simple-build"
+            }
+          },
+          "plan": {
+            "description": "The pricing plan the deployment was made under.",
+            "type": "string"
+          },
+          "public": {
+            "description": "A Boolean representing if the deployment is public or not. By default this is false.",
+            "type": "boolean"
+          },
+          "ownerId": {
+            "description": "The unique ID of the user or team the deployment belongs to.",
+            "type": "string"
+          },
+          "readyState": {
+            "$ref": "#/components/schemas/deployment-ready-state"
+          },
+          "createdAt": {
+            "description": "A number containing the date when the deployment was created in milliseconds.",
+            "type": "integer"
+          },
+          "createdIn": {
+            "description": "The region where the deployment was first created, e.g. sfo1.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "domain-list": {
+        "properties": {
+          "uid": {
+            "description": "The unique ID of the domain.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The domain name.",
+            "type": "string"
+          },
+          "created": {
+            "description": "The date when it was created the registry.",
+            "type": "string"
+          },
+          "boughtAt": {
+            "description": "If it was purchased through Now the date when it was purchased.",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "The date when the domain is going to expire and need to be renewed.",
+            "type": "string"
+          },
+          "isExternal": {
+            "description": "If it is an externally handled domain.",
+            "type": "boolean"
+          },
+          "verified": {
+            "description": "If the domain has the ownership verified. If an external nameserver is used the user must verify the domain name by creating a TXT record for `_now` subdomain containing a verification token provided as a `POST` result. After the record has been created, the user may retry the same `POST` and the endpoint shall return `verified: true`, if the domain was verified succesfully.",
+            "type": "boolean"
+          },
+          "serviceType": {
+            "description": "`external` for externally handled domain; `zeit.world` for managed.",
+            "$ref": "#/components/schemas/service-type"
+          },
+          "cdnEnabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "inlined-file": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "The file name including the whole path, eg. folder/file.js.",
+            "type": "string"
+          },
+          "data": {
+            "description": "The file content, it could be either a base64 (useful for images, etc.) of the files or the plain (UTF-8) content for source code.",
+            "type": "string"
+          },
+          "encoding": {
+            "description": "The encoding used for the file content, it could be either `base64` or `plain`, defaults to `utf-8`.",
+            "type": "string",
+            "enum": ["base64", "utf-8"]
+          }
+        },
+        "required": ["file", "data"]
+      },
+      "log-object": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "description": "The log content as a map.",
+            "$ref": "#/components/schemas/object"
+          },
+          "text": {
+            "description": "The log content as a string.",
+            "type": "string"
+          },
+          "deploymentId": {
+            "description": "The unique identifier of the deployment.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the log.",
+            "type": "string"
+          },
+          "context": {
+            "description": "",
+            "type": "string"
+          },
+          "created": {
+            "description": "The date when the log was created.",
+            "type": "integer"
+          },
+          "serial": {
+            "description": "",
+            "type": "integer"
+          },
+          "type": {
+            "description": "The type of log. The type could be request, response, command or stdout.",
+            "type": "string",
+            "enum": ["request", "response", "command", "stdout"]
+          },
+          "pid": {
+            "description": "The process unique identified which created the log.",
+            "type": "string"
+          },
+          "appName": {
+            "description": "The deployment application name.",
+            "type": "string"
+          },
+          "date": {
+            "description": "The date when the log was created.",
+            "type": "integer"
+          },
+          "region": {
+            "$ref": "#/components/schemas/region"
+          }
+        }
+      },
+      "log-object-real": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "description": "The date when the log was created.",
+            "type": "integer"
+          },
+          "type": {
+            "description": "The type of log. The type could be request, response, command or stdout.",
+            "type": "string",
+            "enum": ["request", "response", "command", "stdout"]
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "serial": {
+                "type": "string"
+              },
+              "date": {
+                "type": "integer"
+              },
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "deploymentId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "region": {
+        "description": "The name of the region where the instance was running. The region could be any supported region, for example; sfo.",
+        "type": "string",
+        "enum": ["bru1", "gru1", "iad1", "sfo1"]
+      },
+      "log-object-key": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "description": "A valid HTTP method.",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The URL which received the request.",
+            "type": "string"
+          },
+          "status": {
+            "description": "A valid HTTP status code.",
+            "type": "string"
+          },
+          "protocol": {
+            "description": "The protocol used for the log.",
+            "type": "string"
+          },
+          "bodyBytesSent": {
+            "description": "The number of bytes sent in the body of the response.",
+            "type": "string"
+          },
+          "remoteAddr": {
+            "description": "The IP address which sent the request.",
+            "type": "string"
+          },
+          "userAgent": {
+            "description": "The user agent of the device which sent the request.",
+            "type": "string"
+          }
+        }
+      },
+      "secret": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "description": "The unique identifier of the secret. Always prepended with sec_.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the secret. This is what you could use in your environment variables after a @.",
+            "type": "string"
+          },
+          "created": {
+            "description": "The date when the secret was created.",
+            "type": "integer"
+          }
+        }
+      },
+      "secret-value": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of structure used to save the secret value (always Buffer).",
+            "type": "string"
+          },
+          "data": {
+            "description": "A list of numbers which could be used to recreate the secret value.",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "sha1-files": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "The file name including the whole path, eg. folder/file.js.",
+            "type": "string"
+          },
+          "sha": {
+            "description": "The file SHA1 used to check the integrity.",
+            "type": "string"
+          },
+          "size": {
+            "description": "The file size in bytes.",
+            "type": "integer"
+          }
+        }
+      },
+      "deployment-ready-state": {
+        "description": "The state of the deployment depending on the process of deploying, or if it is ready or in an error state. Possible values are INITIALIZING, ANALYZING, BUILDING, DEPLOYING, READY, or ERROR.",
+        "type": "string",
+        "enum": [
+          "INITIALIZING",
+          "ANALYZING",
+          "BUILDING",
+          "DEPLOYING",
+          "READY",
+          "ERROR"
+        ]
+      },
+      "role": {
+        "description": "The role inside the team, it could be OWNER or MEMBER.",
+        "type": "string",
+        "enum": ["OWNER", "MEMBER"]
+      },
+      "route": {
+        "description": "Routes objects used to rewrite paths to point towards other internal or external paths",
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "dest": {
+            "type": "string"
+          }
+        },
+        "required": ["src", "dest"]
+      },
+      "dns-record-type": {
+        "description": "The type of record, it could be any valid DNS record.",
+        "type": "string",
+        "enum": [
+          "A",
+          "AAAA",
+          "AFSDB",
+          "APL",
+          "CAA",
+          "CDNSKEY",
+          "CDS",
+          "CERT",
+          "CNAME",
+          "DHCID",
+          "DLV",
+          "DNAME",
+          "DNSKEY",
+          "DS",
+          "HIP",
+          "IPSECKEY",
+          "KEY",
+          "KX",
+          "LOC",
+          "MX",
+          "NAPTR",
+          "NS",
+          "NSEC",
+          "NSEC3",
+          "NSEC3PARAM",
+          "OPENPGPKEY",
+          "PTR",
+          "RP",
+          "RRSIG",
+          "SIG",
+          "SMIMEA",
+          "SOA",
+          "SRV",
+          "SSHFP",
+          "TA",
+          "TKEY",
+          "TLSA",
+          "TSIG",
+          "TXT",
+          "URI",
+          "*",
+          "AXFR",
+          "IXFR",
+          "OPT",
+          "MD",
+          "MF",
+          "MAILA",
+          "MB",
+          "MG",
+          "MR",
+          "MINFO",
+          "MAILB",
+          "WKS",
+          "NB",
+          "NBSTAT",
+          "NULL",
+          "A6",
+          "NXT",
+          "HINFO",
+          "X25",
+          "ISDN",
+          "RT",
+          "NSAP",
+          "NSAP-PTR",
+          "PX",
+          "EID",
+          "NIMLOC",
+          "ATMA",
+          "SINK",
+          "GPOS",
+          "UINFO",
+          "UID",
+          "GID",
+          "UNSPEC",
+          "SPF"
+        ]
+      },
+      "creator-id": {
+        "description": "A map with the ID of the user who created the deployment.",
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string"
+          }
+        }
+      },
+      "team": {
+        "properties": {
+          "id": {
+            "description": "The team unique identifier. Always prepended by team_.",
+            "type": "string"
+          },
+          "slug": {
+            "description": "The team slug. A slugified version of the name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the team.",
+            "type": "string"
+          },
+          "creatorId": {
+            "description": "The ID of the user who created the team.",
+            "type": "string"
+          },
+          "avatar": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "file": {
+        "properties": {
+          "name": {
+            "description": "The name of the file.",
+            "type": "string"
+          },
+          "type": {
+            "description": "If it's a file or a directory.",
+            "type": "string",
+            "enum": ["file", "directory"]
+          },
+          "uid": {
+            "description": "The unique ID of the file (only valid for file type).",
+            "type": "string"
+          },
+          "children": {
+            "description": "The children files of the directory (only valid for directory type).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/file"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "service-type": {
+        "description": "External for externally handled domains; zeit.world for managed.",
+        "type": "string",
+        "enum": ["external", "zeit.world"]
+      },
+      "key-string-values": {
+        "description": "External for externally handled domains; zeit.world for managed.",
+        "type": "map"
+      }
+    }
+  }
+}

@@ -1,0 +1,154 @@
+import Example from '~/components/example'
+import { Code } from '~/components/text/code'
+import { HelpLink } from '~/components/text/link'
+import Endpoint from '~/components/api/endpoint'
+import Request from '~/components/api/request'
+import EndpointComponent from './endpointComponent.jsx'
+
+## Certificates
+
+### List all the certificates
+
+<EndpointComponent method="GET" url="/v3/now/certs" />
+
+#### Certificate
+
+This is the format of each item in the `certs` list.
+
+| Key            | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink>       | Description                                                   |
+| -------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| **uid**        | <HelpLink href="#api-basics/types">ID</HelpLink>                 | The unique identifier of the certificate.                     |
+| **cns**        | <HelpLink href="#api-basics/types">List&lt;String&gt;</HelpLink> | The common names for which domain the certificate was issued. |
+| **created**    | <HelpLink href="#api-basics/types">Date</HelpLink>               | The date when the certificate was created.                    |
+| **expiration** | <HelpLink href="#api-basics/types">Date</HelpLink>               | The date when the certificate is going to expire.             |
+| **autoRenew**  | <HelpLink href="#api-basics/types">Boolean</HelpLink>            | If the certificate is going to be automatically renewed.      |
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v3/now/certs"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example successful (**200**) response:
+
+<Code lang="json">{`{
+  "certs": [
+    {
+      "cns": ["testing.zeit.co", "*.zeit.co"],
+      "uid": "oAjf6y9pxZgCJyQfrclN",
+      "created": "2016-08-23T18:13:09.773Z",
+      "expiration": "2016-12-16T16:00:00.000Z",
+      "autoRenew": true
+    }
+  ]
+}`}</Code>
+</Example>
+
+### Get a single certificate
+
+<EndpointComponent method="GET" url="/v3/now/certs/:id" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v3/now/certs/oAjf6y9pxZgCJyQfrclN"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example successful (200) response:
+
+<Code lang="json">{`{
+  "cns": ["wow.zeit.co"],
+  "uid": "oAjf6y9pxZgCJyQfrclN",
+  "created": "2016-08-23T18:13:09.773Z",
+  "expiration": "2016-12-16T16:00:00.000Z",
+  "autoRenew": true
+}`}</Code>
+</Example>
+
+### Create a new certificate
+
+<EndpointComponent method="POST" url="/v3/now/certs" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="POST"
+  url="https://api.zeit.co/v3/now/certs"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    domains: ['testing.zeit.co'],
+    renew: true
+  }}
+/>
+
+Example successful (**200**) response:
+
+<Code lang="json">{`{
+  "uid": "zWsFytQUFlkUWaR7nWdwS7xR"
+  "created_at": 2016-06-01T21:03:10.420Z"
+}`}</Code>
+</Example>
+
+### Submit a certificate
+
+<EndpointComponent method="PUT" url="/v3/now/certs" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="PUT"
+  url="https://api.zeit.co/v3/now/certs"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    ca: 'PEM formatted CA chain',
+    cert: 'PEM formatted certificate',
+    key: 'PEM formatted private key'
+  }}
+/>
+
+Example successful (**200**) response:
+
+<Code lang="json">{`{
+  "created_at": 2016-06-01T21:03:10.420Z"
+}`}</Code>
+</Example>
+
+### Delete a certificate
+
+<EndpointComponent method="DELETE" url="/v3/now/certs/:id" />
+
+<Example>
+  <span>Example request:</span>
+
+  <Request
+    method="DELETE"
+    url="https://api.zeit.co/v3/now/certs/zWsFytQUFlkUWaR7nWdwS7xR"
+    headers={{
+      Authorization: `Bearer ${(props.testingToken ? props.testingToken.token : '$TOKEN')}`
+    }}
+  />
+</Example>

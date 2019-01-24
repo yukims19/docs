@@ -1,0 +1,378 @@
+{
+  "/v2/domains": {
+    "post": {
+      "operationId": "Add a New Domain.v2",
+      "description": "Register a new domain name with Now for the authenticating\nuser. The field serviceType selects whether the domains are going to use\nzeit.world DNS or an external nameserver. In the latter case a CNAME/ALIAS\nrecord(s) are expected to point towards alias.zeit.co.",
+      "parameters": [],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "uid": {
+                    "description": "The unique identifier of the domain.",
+                    "type": "string"
+                  },
+                  "verified": {
+                    "description": "If the domain has the ownership verified.",
+                    "type": "boolean"
+                  },
+                  "verifyToken": {
+                    "description": "The token required to verify the ownership of an external domain.",
+                    "type": "string"
+                  },
+                  "created": {
+                    "description": "The date when the new domain was created.",
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "name": {
+                  "description": "The domain name you want to add.",
+                  "type": "string"
+                },
+                "serviceType": {
+                  "description": "The field serviceType selects whether the domains is going to use zeit.world DNS or an external nameserver. In the latter case a CNAME/ALIAS record(s) are expected to point towards alias.zeit.co.",
+                  "$ref": "#/components/schemas/service-type"
+                }
+              },
+              "required": ["name"],
+              "type": "object"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "get": {
+      "operationId": "ListAllTheDomainsV2",
+      "description": "Retrieves a list of domains registered for the authenticating user. The domain property isExternal is a boolean value telling whether an external nameserver is used to manage DNS records for the domain.",
+      "parameters": [],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/domain-list"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/v2/domains/buy": {
+    "post": {
+      "operationId": "PurchaseADomainV2",
+      "description": "Purchase the specified domain, it receive the domain name as the key name inside the request body.",
+      "parameters": [],
+      "responses": {
+        "200": {
+          "$ref": "",
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "name": {
+                  "description": "The domain name to purchase.",
+                  "type": "string"
+                },
+                "expectedPrice": {
+                  "description": "The price you expect to be charged for the purchase.",
+                  "type": "integer"
+                }
+              },
+              "required": ["name"],
+              "type": "object"
+            }
+          }
+        },
+        "required": true
+      }
+    }
+  },
+  "/v2/domains/price": {
+    "get": {
+      "operationId": "CheckThePriceOfADomainV2",
+      "description": "Check the price to purchase a domain and how long a single purchase period is. The response is a JSON with the key price as a number (always an integer) and a key period as a number indicating the number of years the domains could be held before paying again.",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "price": {
+                    "description": "The domain price.",
+                    "type": "integer"
+                  },
+                  "period": {
+                    "description": "The time period by which the domain is purchased.",
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/v2/domains/status": {
+    "get": {
+      "operationId": "CheckADomainAvailabilityV2",
+      "description": "Check if a domain name may be available to buy or not. The response is a JSON with the key available as a boolean.",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "available": {
+                    "description": "If the domain is available or not.",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/v2/domains/{domain}/records": {
+    "post": {
+      "operationId": "CreateANewDnsRecordV2",
+      "description": "Create a DNS record for a domain specified in the URL. mxPriority\nfield should be set for MX records and left out otherwise.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "domain",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "uid": {
+                    "description": "The unique ID of the DNS record. Always prepended with rec_.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "name": {
+                  "description": "The subdomain which we're configuring or @ for the domain itself.",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The type of record, it could be any valid DNS record.",
+                  "type": "string",
+                  "enum": [""]
+                },
+                "value": {
+                  "description": "The record value.",
+                  "type": "string"
+                },
+                "mxPriority": {
+                  "description": "The priority for MX records, is only required if the record type is MX.",
+                  "type": "integer"
+                }
+              },
+              "required": ["name", "type", "value"],
+              "type": "object"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "get": {
+      "operationId": "ListAllTheDnsRecordsOfADomainV2",
+      "description": "Get a list of DNS records created for a domain name specified in the URL.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "domain",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "id": {
+                    "description": "The unique ID of the DNS record. Always prepended with rec_.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "$ref": "#/components/schemas/dns-record-type"
+                  },
+                  "name": {
+                    "description": "The subdomain which we're configuring or @ for the domain itself.",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "The record value.",
+                    "type": "string"
+                  },
+                  "created": {
+                    "description": "A timestamp with the date when the record was created.",
+                    "type": "string"
+                  },
+                  "updated": {
+                    "description": "A timestamp with the date when we created the deployment.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/v2/domains/{domain}/records/{recId}": {
+    "delete": {
+      "operationId": "RemoveADnsRecordV2",
+      "description": "Delete a DNS record created for a domain name, where both the domain\nand the record ID are specified in the URL. If the record was removed\nsuccessfully the endpoint returns with code 200 and an empty body.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "domain",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "recId",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "$ref": "",
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {},
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/v2/domains/{name}": {
+    "delete": {
+      "operationId": "RemoveADomainByNameV2",
+      "description": "Delete a previously registered domain name from Now.\nDeleting a domain will automatically remove any associated aliases.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "uid": {
+                    "description": "The unique ID of the removed domain.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

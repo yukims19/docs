@@ -1,0 +1,97 @@
+import Example from '~/components/example'
+import { Code } from '~/components/text/code'
+import { HelpLink } from '~/components/text/link'
+import Endpoint from '~/components/api/endpoint'
+import Request from '~/components/api/request'
+import EndpointComponent from './endpointComponent.jsx'
+
+## DNS
+
+### List all the DNS records of a domain
+
+<EndpointComponent method="GET" url="/v2/domains/:domain/records" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v2/domains/zeit.rocks/records"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example successful (**200**) response:
+
+<Code lang="json">{`{
+  "records": [
+    {
+      "id": "rec_38OtX1f51szRA03atCybBuZ3",
+      "slug": "zeit.rocks.-address",
+      "type": "ALIAS",
+      "name": "",
+      "value": "alias.zeit.co",
+      "created": "1474631621542",
+      "updated": null
+    },
+    {
+      "id": "rec_Pxo2HEfutmlIYECtTE4SpDzY",
+      "slug": "*.zeit.rocks.-address",
+      "type": "CNAME",
+      "name": "*",
+      "value": "alias.zeit.co",
+      "created": "1474631619960",
+      "updated": null
+    }
+  ]
+}`}</Code>
+</Example>
+
+### Create a new DNS record
+
+<EndpointComponent method="POST" url="/v2/domains/:domain/records" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="POST"
+  url="https://api.zeit.co/v2/domains/zeit.rocks/records"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    name: 'subdomain',
+    type: 'MX',
+    value: 'mail.zeit.rocks',
+    mxPriority: 10
+  }}
+/>
+
+Example successful (**200**) response:
+
+<Code lang="json">{`{
+  uid: "rec_V0fra8eEgQwEpFhYG2vTzC3K"
+}`}</Code>
+</Example>
+
+### Remove a DNS record
+
+<EndpointComponent method="DELETE" url="/v2/domains/:domain/records/:recId" />
+
+<Example>
+  <span>Example request:</span>
+
+  <Request
+    method="DELETE"
+    url="https://api.zeit.co/v2/domains/zeit.rocks/records/rec_V0fra8eEgQwEpFhYG2vTzC3K"
+    headers={{
+      Authorization: `Bearer ${(props.testingToken ? props.testingToken.token : '$TOKEN')}`
+    }}
+  />
+</Example>

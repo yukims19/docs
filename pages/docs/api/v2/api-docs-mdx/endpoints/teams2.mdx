@@ -1,0 +1,250 @@
+import Example from '~/components/example'
+import { Code, InlineCode } from '~/components/text/code'
+import { HelpLink } from '~/components/text/link'
+import Note from '~/components/text/note'
+import { P } from '~/components/text/paragraph'
+import Endpoint from '~/components/api/endpoint'
+import Request from '~/components/api/request'
+import EndpointComponent from './endpointComponent.jsx'
+
+## Teams
+
+### Create a team
+
+<EndpointComponent method="POST" url="/v1/teams" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="POST"
+  url="https://api.zeit.co/v1/teams"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    slug: 'a-random-team'
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "id": "team_LLHUOMOoDlqOp8wPE4kFo9pE"
+}`}</Code>
+</Example>
+
+### List all your teams
+
+<EndpointComponent method="GET" url="/v1/teams" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v1/teams"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "teams": [
+    {
+      "id": "team_ofwUZockJlL53hINUGCc1ONW",
+      "slug": "my-team",
+      "name": "My Team",
+      "creatorId": "2qDDuGFTWXBLDNnqZfWPDp1A",
+      "created": "2017-04-29T17:21:54.514Z",
+      "avatar": null
+    }
+  ]
+}`}</Code>
+</Example>
+
+### Get single team information
+
+<Endpoint>
+  GET /v1/teams/:id
+  <br />
+  GET /v1/teams?slug
+</Endpoint>
+
+Get the information of a specific team, it could be used either passing the `:id` in the URL or the team `slug` as a query parameter.
+
+#### Response Parameters
+
+| Key           | <HelpLink href="#api-basics/types" hasIcon>Type</HelpLink> | Description                                              |
+| ------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| **id**        | <HelpLink href="#api-basics/types">ID</HelpLink>           | The team unique identifier. Always prepended by `team_`. |
+| **slug**      | <HelpLink href="#api-basics/types">String</HelpLink>       | The team slug. A slugified version of the `name`.        |
+| **name**      | <HelpLink href="#api-basics/types">String</HelpLink>       | The name of the team.                                    |
+| **creatorId** | <HelpLink href="#api-basics/types">ID</HelpLink>           | The ID of the user who created the team.                 |
+| **avatar**    | <HelpLink href="#api-basics/types">String</HelpLink>       |                                                          |
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v1/teams/team_ofwUZockJlL53hINUGCc1ONW"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "id": "team_ofwUZockJlL53hINUGCc1ONW",
+  "slug": "my-team",
+  "name": "My Team",
+  "creatorId": "2qDDuGFTWXBLDNnqZfWPDp1A",
+  "created": "2017-04-29T17:21:54.514Z",
+  "avatar": null
+}`}</Code>
+</Example>
+
+### Update team information
+
+<EndpointComponent method="PATCH" url="/v1/teams/:id" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="PATCH"
+  url="https://api.zeit.co/v1/teams/team_ofwUZockJlL53hINUGCc1ONW"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    name: 'My Cool Team'
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "id": "team_ofwUZockJlL53hINUGCc1ONW",
+  "slug": "my-team",
+  "name": "My Cool Team",
+  "creator_id": "2qDDuGFTWXBLDNnqZfWPDp1A",
+  "creatorId": "2qDDuGFTWXBLDNnqZfWPDp1A"
+}`}</Code>
+</Example>
+
+### Get list of team members
+
+<EndpointComponent method="GET" url="/v1/teams/:id/members" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  url="https://api.zeit.co/v1/teams/team_ofwUZockJlL53hINUGCc1ONW/members"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`[
+  {
+    "uid": "2qDDuGFTWXBLDNnqZfWPDp1A",
+    "role": "OWNER",
+    "email": "user-emailgmail.com",
+    "username": "some-user"
+  },
+  {
+    "uid": "JJHkdv6NaPOTH88pXn8FEuGz",
+    "role": "OWNER",
+    "email": "another-user@mail.com",
+    "username": "another-user"
+  }
+]`}</Code>
+</Example>
+
+### Invite user to team
+
+<EndpointComponent method="POST" url="/v1/teams/:id/members" />
+
+<Example>
+  <span>Example request:</span>
+
+<Request
+  method="POST"
+  url="https://api.zeit.co/v1/teams/team_ofwUZockJlL53hINUGCc1ONW/members"
+  headers={{
+    Authorization: `Bearer ${
+      props.testingToken ? props.testingToken.token : '$TOKEN'
+    }`,
+    'Content-Type': 'application/json'
+  }}
+  body={{
+    email: 'user@mail.com'
+  }}
+/>
+
+Example response:
+
+<Code lang="json">{`{
+  "uid": "kr1PsOIzqEL5Xg6M4VZcZosf",
+  "username": "an-user"
+}`}</Code>
+</Example>
+
+### Change user role
+
+<EndpointComponent method="PATCH" url="/v1/teams/:id/members/:userId" />
+
+<Example>
+  <span>Example request:</span>
+
+  <Request
+    method="PATCH"
+    url="https://api.zeit.cov/v1/teams/team_ofwUZockJlL53hINUGCc1ONW/members/kr1PsOIzqEL5Xg6M4VZcZosf"
+    headers={{
+      Authorization: `Bearer ${(props.testingToken ? props.testingToken.token : '$TOKEN')}`,
+      'Content-Type': 'application/json'
+    }}
+    body={{
+      "role": "OWNER"
+    }}
+  />
+</Example>
+
+### Remove user from team
+
+<EndpointComponent method="DELETE" url="/v1/teams/:id/members/:userId" />
+
+<Note>
+  You need to be <InlineCode>OWNER</InlineCode> to use it and the user{' '}
+  <P.B>must not</P.B> be an owner themselves.
+</Note>
+
+<Example>
+  <span>Example request:</span>
+
+  <Request
+    method="DELETE"
+    url="https://api.zeit.co/v1/teams/team_ofwUZockJlL53hINUGCc1ONW/members/kr1PsOIzqEL5Xg6M4VZcZosf"
+    headers={{
+      Authorization: `Bearer ${(props.testingToken ? props.testingToken.token : '$TOKEN')}`
+    }}
+  />
+</Example>
