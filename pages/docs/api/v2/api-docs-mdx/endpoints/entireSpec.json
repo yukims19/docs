@@ -1704,11 +1704,11 @@
                     },
                     "createdAt": {
                       "description": "A number containing the date when the deployment was created in milliseconds.",
-                      "type": "integer"
+                      "$ref": "#/components/schemas/date"
                     },
                     "createdIn": {
                       "description": "The region where the deployment was first created, e.g. sfo1.",
-                      "type": "string"
+                      "$ref": "#/components/schemas/region"
                     }
                   },
                   "type": "object"
@@ -2040,7 +2040,7 @@
           },
           "createdAt": {
             "description": "A number containing the date when the deployment was created in milliseconds.",
-            "type": "integer"
+            "$ref": "#/components/schemas/date"
           },
           "createdIn": {
             "description": "The region where the deployment was first created, e.g. sfo1.",
@@ -2061,15 +2061,15 @@
           },
           "created": {
             "description": "The date when it was created the registry.",
-            "type": "string"
+            "$ref": "#/components/schemas/timestamp"
           },
           "boughtAt": {
             "description": "If it was purchased through Now the date when it was purchased.",
-            "type": "string"
+            "$ref": "#/components/schemas/timestamp"
           },
           "expiresAt": {
-            "description": "The date when the domain is going to expire and need to be renewed.",
-            "type": "string"
+            "description": "The date when the domain is going to expire and needs to be renewed.",
+            "$ref": "#/components/schemas/timestamp"
           },
           "isExternal": {
             "description": "If it is an externally handled domain.",
@@ -2461,6 +2461,16 @@
       "key-string-values": {
         "description": "External for externally handled domains; zeit.world for managed.",
         "type": "map"
+      },
+      "date": {
+        "description": "An Integer representing a date in milliseconds since the UNIX epoch",
+        "type": "integer",
+        "example": 1540095775941
+      },
+      "timestamp": {
+        "description": "An [RFC3339](https://tools.ietf.org/html/rfc3339) timestamp",
+        "type": "string",
+        "example": "2018-08-15T23:19:34.000Z"
       }
     }
   }

@@ -2,8 +2,37 @@ import Endpoint from '~/components/api/endpoint'
 import Example from '~/components/example'
 import Request from '~/components/api/request'
 import { Code } from '~/components/text/code'
-import { P } from '~/components/text/paragraph'
+import Heading from '~/components/text/linked-heading'
 import { HelpLink } from '~/components/text/link'
+import H3 from '~/components/text/h3'
+import H4 from '~/components/text/h4'
+
+// Copy/pasted from docs.js
+const DocH3 = ({ children }) => (
+  <div>
+    <Heading lean offsetTop={175}>
+      <H3>{children}</H3>
+    </Heading>
+    <style jsx>{`
+      div {
+        margin: 40px 0 0 0;
+      }
+    `}</style>
+  </div>
+)
+
+const DocH4 = ({ children }) => (
+  <div>
+    <Heading lean offsetTop={175}>
+      <H4>{children}</H4>
+    </Heading>
+    <style jsx>{`
+      div {
+        margin: 40px 0 0 0;
+      }
+    `}</style>
+  </div>
+)
 
 const capitalize = string => {
   return string.charAt(0).toUpperCase() + string.slice(1)
@@ -16,12 +45,18 @@ const getRefName = ref => {
 const getRefFriendlyName = ref => {
   let refName = getRefName(ref)
   // turn "deployment-ready-state" => "Deployment ready state"
-  return capitalize(refName).replace(/\W+/g, ' ')
+  return capitalize(refName)
+    .replace(/\W+/g, ' ')
+    .split(' ')
+    .map(capitalize)
+    .join('')
 }
 
 const resolveRefObject = (spec, refPath) => {
   return spec.components.schemas[getRefName(refPath)]
 }
+
+const scalarTypes = ['string', 'integer', 'boolean']
 
 const getType = (spec, schema) => {
   if (schema.type) {
@@ -36,11 +71,22 @@ const getType = (spec, schema) => {
     } else {
       return capitalize(schema.type)
     }
-  } else if (schema['ref']) {
+  } else if (schema['$ref']) {
+    let refName = getRefFriendlyName(schema['$ref'])
     let refSchema = resolveRefObject(spec, schema['$ref'])
+
     const isEnum = !!refSchema.enum
     const enumValues = isEnum ? refSchema.enum.join('|') : []
-    return isEnum ? `Enum<${enumValues}>` : capitalize(refSchema.type)
+
+    /* If a ref is a scalar, it must have been given a special name for a reason,
+     so use that name */
+    const isScalar = !isEnum && scalarTypes.indexOf(refSchema.type) > -1
+
+    const typeName = isEnum
+      ? `Enum<${refName}>`
+      : capitalize(isScalar ? refName : refSchema.type)
+
+    return typeName
   } else {
     return null
   }
@@ -236,11 +282,11 @@ const operationDetails = (spec, operation, method, url) => {
 
   return (
     <div style={{ border: '1px solid black' }}>
-      <h3 className="jsx-2454259911">
+      <DocH3>
         <a href={operationAnchor} className="jsx-2892434432">
           {capitalize(operationFriendlyName)}
         </a>
-      </h3>
+      </DocH3>
       <Endpoint method={method} url={url} />
       <p className="jsx-3121034208">{operation.description}</p>
 
@@ -291,7 +337,7 @@ const ItemDetail = ({ itemName, description }) => {
   console.log(spec.components.schemas[item].properties)
   return (
     <div>
-      <h4 className="jsx-4140571023 ">{itemName}</h4>
+      <DocH4>{itemName}</DocH4>
       {description ? <p>{description}</p> : null}
       <div className="jsx-4128209634 table-container">
         <table className="jsx-4128209634 table">
