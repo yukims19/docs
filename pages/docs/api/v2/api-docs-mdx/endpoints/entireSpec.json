@@ -1727,7 +1727,7 @@
     },
     "/v6/now/deployments": {
       "post": {
-        "operationId": "CreateANewDeploymentV6",
+        "operationId": "CreateANewDeploymentV6Wow",
         "description": "Create a new deployment with all the required and intended data.\n\nBefore creating a deployment, [upload any required files](#endpoints/deployments/upload-deployment-files) when they cannot be posted at once by inlining files.",
         "parameters": [
           {
