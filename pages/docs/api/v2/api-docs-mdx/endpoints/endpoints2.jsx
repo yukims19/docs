@@ -12,7 +12,148 @@ import spec from './entireSpec.json'
 import { diffString, diff } from 'json-diff'
 import OneGraphAuth from 'onegraph-auth'
 
-const APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
+const _APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
+const APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
+
+const getFileShaQuery = `query getFileSha($name: String!, $owner: String!, $branchAndFilePath: String!) {
+  gitHub {
+    repository(name: $name, owner: $owner) {
+      object(expression: $branchAndFilePath) {
+        ... on GitHubBlob {
+          oid
+        }
+      }
+    }
+  }
+}`;
+
+const createBranchQuery = `mutation createBranch(
+  $owner: String!
+  $name: String!
+  $branchName: String!
+) {
+  gitHub {
+    ogCreateBranch(
+      input: {
+        branchName: $branchName
+        repoName: $name
+        repoOwner: $owner
+      }
+    ) {
+      ref {
+        name
+        id
+      }
+    }
+  }
+}`;
+
+const updateFileContentQuery = `mutation updateFile(
+  $owner: String!
+  $name: String!
+  $branchName: String!
+  $path: String!
+  $message: String!
+  $content: String!
+  $sha: String!
+) {
+  gitHub {
+    ogCreateOrUpdateFileContent(
+      input: {
+        message: $message
+        path: $path
+        repoName: $name
+        repoOwner: $owner
+        branchName: $branchName
+        plainContent: $content,
+        existingFileSha: $sha
+      }
+    ) {
+      commit {
+        message
+      }
+    }
+  }
+}`;
+
+const createPullRequestQuery = `mutation createPullRequest(
+  $owner: String!
+  $name: String!
+  $sourceBranch: String!
+  $title: String!
+  $body: String
+  $destinationBranch: String
+) {
+  gitHub {
+    ogCreatePullRequest(
+      input: {
+        sourceBranch: $sourceBranch
+        title: $title
+        repoName: $name
+        repoOwner: $owner
+        body: $body
+        destinationBranch: $destinationBranch
+      }
+    ) {
+      pullRequest {
+        id
+        title
+      }
+    }
+  }
+}`;
+
+const graphqler = (auth, query, variables) =>
+      {
+        const authHeaders = auth.authHeaders();
+      const n = new Request("http://serve.onegraph.io:8082/dynamic?app_id=" + APP_ID,
+                    {
+                      headers: authHeaders,
+                      "method": "POST",
+                      "body": JSON.stringify({"query": query, "variables": variables}, null, 2)
+                    });
+        return fetch(n)
+          .then(response => {
+            if (response.status === 200) {
+              return response.json();
+            } else {
+              alert('Something went wrong on api server!');
+            }
+          })
+      };
+
+const submitFullPr = (auth, _title, newSpec) => {
+  const title = _title || "hardcoded"
+  const safeTitle = title.replace(/\W+/g, '-').toLowerCase();
+  const branchName = "docs-edit-" + safeTitle;
+  const filePath = "pages/docs/api/v2/api-docs-mdx/endpoints/entireSpec.json"
+
+  return graphqler(auth, createBranchQuery, {owner: "yukims19", name: "docs", branchName: branchName})
+    .then(json => {
+      console.log("Got json result:", json)
+      return graphqler(auth, getFileShaQuery, {owner: "yukims19",
+                                               name: "docs",
+                                               branchAndFilePath: `${branchName}:${filePath}`})
+    }).then(result => {
+      const fileSha = result.data.gitHub.repository.object.oid;
+      console.log("Also got sha: ", fileSha)
+      return graphqler(auth, updateFileContentQuery,
+                       {owner: "yukims19",
+                        name: "docs",
+                        branchName: branchName,
+                        path: filePath,
+                        message: title,
+                        content: JSON.stringify(newSpec, null, 2),
+                        sha: fileSha})})
+    .then(result => {
+      return graphqler(auth, createPullRequestQuery,
+                       {owner: "yukims19",
+                        name: "docs",
+                        sourceBranch: branchName,
+                        title: title,
+                        body: null,
+                        destinationBranch: "master"})})
+};
 
 class Endpoints extends React.Component {
   constructor(props) {
@@ -30,10 +171,12 @@ class Endpoints extends React.Component {
 
   componentDidMount() {
     const auth = new OneGraphAuth({
-      appId: APP_ID
+      appId: APP_ID,
+      oneGraphOrigin: "http://serve.onegraph.io:8082",
     })
 
     auth.isLoggedIn('github').then(isLoggedIn => {
+      console.log("Is logged in: ", isLoggedIn);
       if (isLoggedIn) {
         this.setState(oldState => {
           return { ...oldState, auth: auth, isLoggedInGitHub: isLoggedIn }
@@ -44,10 +187,14 @@ class Endpoints extends React.Component {
         })
       }
     })
+
+    window.testIt = this.makeNewPR.bind(this)
   }
 
   handleGitHubLogin() {
-    this.state.auth
+    const auth = this.state.auth
+
+    auth
       .login('github')
       .then(() => {
         auth.isLoggedIn('github').then(isLoggedIn => {
@@ -89,7 +236,10 @@ class Endpoints extends React.Component {
   }
 
   makeNewPR() {
-    console.log('New PR')
+    console.log('New PR', this.state.spec, "<--- the spec")
+    window.ogAuth = this.state.auth
+    submitFullPr(this.state.auth, this.state.prTitle, this.state.spec);
+
     this.setState({
       isModalOpen: false,
       prTitle: null,
@@ -137,7 +287,7 @@ class Endpoints extends React.Component {
               onClick={e => this.toggleModal()}
             />
             <form
-              onSubmit={e => this.makeNewPR()}
+
               style={{
                 width: '300px',
                 height: '220px',
@@ -195,7 +345,10 @@ class Endpoints extends React.Component {
                 }}
               />
               <button
-                type="submit"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                this.makeNewPR()}}
                 style={{
                   fontSize: '16px',
                   borderRadius: '3px',

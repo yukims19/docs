@@ -8,6 +8,8 @@ import spec from './entireSpec.json'
 
 ## Aliases
 
+<EndpointComponent spec={spec} method="WOW" url="/not-exist" />
+
 <EndpointComponent spec={spec} method="GET" url="/v2/now/aliases" />
 <EndpointComponent spec={spec} method="DELETE" url="/v2/now/aliases/:id" />
 <EndpointComponent spec={spec} method="PURGE" url="/v2/now/aliases/:id" />
@@ -21,3 +23,5 @@ import spec from './entireSpec.json'
   method="POST"
   url="/v2/now/deployments/:id/aliases"
 />
+
+### Hello, custom text!

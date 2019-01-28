@@ -490,7 +490,6 @@ class OperationDetails extends React.Component {
   render() {
     const { updateSpec } = this.props
 
-    console.log('My updater', this.modifySpec)
     return (
       <div style={{ border: '1px solid black' }}>
         <DocH3
