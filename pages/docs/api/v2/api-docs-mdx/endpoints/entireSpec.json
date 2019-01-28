@@ -58,7 +58,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["email", "tokenName"],
+                "required": [
+                  "email",
+                  "tokenName"
+                ],
                 "type": "object"
               }
             }
@@ -164,7 +167,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["slug"],
+                "required": [
+                  "slug"
+                ],
                 "type": "object"
               }
             }
@@ -215,7 +220,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["slug", "name"],
+                "required": [
+                  "slug",
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -296,7 +304,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["email"],
+                "required": [
+                  "email"
+                ],
                 "type": "object"
               }
             }
@@ -428,10 +438,14 @@
                   "role": {
                     "description": "The new role of the team member, it could be OWNER or MEMBER.",
                     "type": "string",
-                    "enum": [""]
+                    "enum": [
+                      ""
+                    ]
                   }
                 },
-                "required": ["role"],
+                "required": [
+                  "role"
+                ],
                 "type": "object"
               }
             }
@@ -489,7 +503,9 @@
                     "$ref": "#/components/schemas/service-type"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -548,7 +564,9 @@
                     "type": "integer"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -673,7 +691,9 @@
                   "type": {
                     "description": "The type of record, it could be any valid DNS record.",
                     "type": "string",
-                    "enum": [""]
+                    "enum": [
+                      ""
+                    ]
                   },
                   "value": {
                     "description": "The record value.",
@@ -684,7 +704,11 @@
                     "type": "integer"
                   }
                 },
-                "required": ["name", "type", "value"],
+                "required": [
+                  "name",
+                  "type",
+                  "value"
+                ],
                 "type": "object"
               }
             }
@@ -1018,7 +1042,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["alias"],
+                "required": [
+                  "alias"
+                ],
                 "type": "object"
               },
               "examples": {
@@ -1201,7 +1227,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "value"],
+                "required": [
+                  "name",
+                  "value"
+                ],
                 "type": "object"
               }
             }
@@ -1330,7 +1359,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["name"],
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
@@ -1380,7 +1411,11 @@
                     "type": "string"
                   }
                 },
-                "required": ["ca", "cert", "key"],
+                "required": [
+                  "ca",
+                  "cert",
+                  "key"
+                ],
                 "type": "object"
               }
             }
@@ -1427,7 +1462,9 @@
                     }
                   }
                 },
-                "required": ["domains"],
+                "required": [
+                  "domains"
+                ],
                 "type": "object"
               }
             }
@@ -1786,8 +1823,15 @@
                       "readyState": "READY",
                       "createdAt": 1540257237129,
                       "createdIn": "sfo1",
-                      "regions": ["sfo1"],
-                      "builds": [{ "src": "**", "use": "@now/static" }],
+                      "regions": [
+                        "sfo1"
+                      ],
+                      "builds": [
+                        {
+                          "src": "**",
+                          "use": "@now/static"
+                        }
+                      ],
                       "routes": null,
                       "env": [],
                       "build": {
@@ -1854,7 +1898,11 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["name", "files", "version"],
+                "required": [
+                  "name",
+                  "files",
+                  "version"
+                ],
                 "type": "object"
               },
               "examples": {
@@ -1972,7 +2020,10 @@
             "type": "string"
           }
         },
-        "required": ["src", "use"]
+        "required": [
+          "src",
+          "use"
+        ]
       },
       "certificate": {
         "type": "object",
@@ -2162,10 +2213,16 @@
           "encoding": {
             "description": "The encoding used for the file content, it could be either `base64` or `plain`, defaults to `utf-8`.",
             "type": "string",
-            "enum": ["base64", "utf-8"]
+            "enum": [
+              "base64",
+              "utf-8"
+            ]
           }
         },
-        "required": ["file", "data"]
+        "required": [
+          "file",
+          "data"
+        ]
       },
       "log-object": {
         "type": "object",
@@ -2201,7 +2258,12 @@
           "type": {
             "description": "The type of log. The type could be request, response, command or stdout.",
             "type": "string",
-            "enum": ["request", "response", "command", "stdout"]
+            "enum": [
+              "request",
+              "response",
+              "command",
+              "stdout"
+            ]
           },
           "pid": {
             "description": "The process unique identified which created the log.",
@@ -2230,7 +2292,12 @@
           "type": {
             "description": "The type of log. The type could be request, response, command or stdout.",
             "type": "string",
-            "enum": ["request", "response", "command", "stdout"]
+            "enum": [
+              "request",
+              "response",
+              "command",
+              "stdout"
+            ]
           },
           "payload": {
             "type": "object",
@@ -2257,7 +2324,12 @@
       "region": {
         "description": "The name of the region where the instance was running. The region could be any supported region, for example, `sfo`.",
         "type": "string",
-        "enum": ["bru1", "gru1", "iad1", "sfo1"]
+        "enum": [
+          "bru1",
+          "gru1",
+          "iad1",
+          "sfo1"
+        ]
       },
       "log-object-key": {
         "type": "object",
@@ -2357,7 +2429,10 @@
       "role": {
         "description": "The role inside the team, it could be OWNER or MEMBER.",
         "type": "string",
-        "enum": ["OWNER", "MEMBER"]
+        "enum": [
+          "OWNER",
+          "MEMBER"
+        ]
       },
       "route": {
         "description": "Routes objects used to rewrite paths to point towards other internal or external paths",
@@ -2370,7 +2445,10 @@
             "type": "string"
           }
         },
-        "required": ["src", "dest"]
+        "required": [
+          "src",
+          "dest"
+        ]
       },
       "dns-record-type": {
         "description": "The type of record, it could be any valid DNS record.",
@@ -2496,7 +2574,10 @@
           "type": {
             "description": "If it's a file or a directory.",
             "type": "string",
-            "enum": ["file", "directory"]
+            "enum": [
+              "file",
+              "directory"
+            ]
           },
           "uid": {
             "description": "The unique ID of the file (only valid for file type).",
@@ -2515,7 +2596,10 @@
       "service-type": {
         "description": "External for externally handled domains; zeit.world for managed.",
         "type": "string",
-        "enum": ["external", "zeit.world"]
+        "enum": [
+          "external",
+          "zeit.world"
+        ]
       },
       "key-string-values": {
         "description": "External for externally handled domains; zeit.world for managed.",
