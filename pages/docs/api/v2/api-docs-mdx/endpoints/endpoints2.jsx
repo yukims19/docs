@@ -11,6 +11,8 @@ import OAuth2 from './oauth2.mdx'
 import spec from './entireSpec.json'
 import { diffString, diff } from 'json-diff'
 import OneGraphAuth from 'onegraph-auth'
+import Button from '~/components/buttons'
+import Input from '~/components/input'
 
 const _APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
 const APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
@@ -25,14 +27,14 @@ const getFileShaQuery = `query getFileSha($name: String!, $owner: String!, $bran
       }
     }
   }
-}`;
+}`
 
 const createBranchQuery = `mutation createBranch(
-  $owner: String!
-  $name: String!
-  $branchName: String!
+    $owner: String!
+    $name: String!
+    $branchName: String!
 ) {
-  gitHub {
+    gitHub {
     ogCreateBranch(
       input: {
         branchName: $branchName
@@ -46,7 +48,7 @@ const createBranchQuery = `mutation createBranch(
       }
     }
   }
-}`;
+}`
 
 const updateFileContentQuery = `mutation updateFile(
   $owner: String!
@@ -74,7 +76,7 @@ const updateFileContentQuery = `mutation updateFile(
       }
     }
   }
-}`;
+}`
 
 const createPullRequestQuery = `mutation createPullRequest(
   $owner: String!
@@ -101,59 +103,70 @@ const createPullRequestQuery = `mutation createPullRequest(
       }
     }
   }
-}`;
+}`
 
-const graphqler = (auth, query, variables) =>
-      {
-        const authHeaders = auth.authHeaders();
-      const n = new Request("http://serve.onegraph.io:8082/dynamic?app_id=" + APP_ID,
-                    {
-                      headers: authHeaders,
-                      "method": "POST",
-                      "body": JSON.stringify({"query": query, "variables": variables}, null, 2)
-                    });
-        return fetch(n)
-          .then(response => {
-            if (response.status === 200) {
-              return response.json();
-            } else {
-              alert('Something went wrong on api server!');
-            }
-          })
-      };
+const graphqler = (auth, query, variables) => {
+  const authHeaders = auth.authHeaders()
+  const n = new Request(
+    'http://serve.onegraph.io:8082/dynamic?app_id=' + APP_ID,
+    {
+      headers: authHeaders,
+      method: 'POST',
+      body: JSON.stringify({ query: query, variables: variables }, null, 2)
+    }
+  )
+  return fetch(n).then(response => {
+    if (response.status === 200) {
+      return response.json()
+    } else {
+      alert('Something went wrong on api server!')
+    }
+  })
+}
 
 const submitFullPr = (auth, _title, newSpec) => {
-  const title = _title || "hardcoded"
-  const safeTitle = title.replace(/\W+/g, '-').toLowerCase();
-  const branchName = "docs-edit-" + safeTitle;
-  const filePath = "pages/docs/api/v2/api-docs-mdx/endpoints/entireSpec.json"
+  const title = _title || 'hardcoded'
+  const safeTitle = title.replace(/\W+/g, '-').toLowerCase()
+  const branchName = 'docs-edit-' + safeTitle
+  const filePath = 'pages/docs/api/v2/api-docs-mdx/endpoints/entireSpec.json'
 
-  return graphqler(auth, createBranchQuery, {owner: "yukims19", name: "docs", branchName: branchName})
+  return graphqler(auth, createBranchQuery, {
+    owner: 'yukims19',
+    name: 'docs',
+    branchName: branchName
+  })
     .then(json => {
-      console.log("Got json result:", json)
-      return graphqler(auth, getFileShaQuery, {owner: "yukims19",
-                                               name: "docs",
-                                               branchAndFilePath: `${branchName}:${filePath}`})
-    }).then(result => {
-      const fileSha = result.data.gitHub.repository.object.oid;
-      console.log("Also got sha: ", fileSha)
-      return graphqler(auth, updateFileContentQuery,
-                       {owner: "yukims19",
-                        name: "docs",
-                        branchName: branchName,
-                        path: filePath,
-                        message: title,
-                        content: JSON.stringify(newSpec, null, 2),
-                        sha: fileSha})})
+      console.log('Got json result:', json)
+      return graphqler(auth, getFileShaQuery, {
+        owner: 'yukims19',
+        name: 'docs',
+        branchAndFilePath: `${branchName}:${filePath}`
+      })
+    })
     .then(result => {
-      return graphqler(auth, createPullRequestQuery,
-                       {owner: "yukims19",
-                        name: "docs",
-                        sourceBranch: branchName,
-                        title: title,
-                        body: null,
-                        destinationBranch: "master"})})
-};
+      const fileSha = result.data.gitHub.repository.object.oid
+      console.log('Also got sha: ', fileSha)
+      return graphqler(auth, updateFileContentQuery, {
+        owner: 'yukims19',
+        name: 'docs',
+        branchName: branchName,
+        path: filePath,
+        message: title,
+        content: JSON.stringify(newSpec, null, 2),
+        sha: fileSha
+      })
+    })
+    .then(result => {
+      return graphqler(auth, createPullRequestQuery, {
+        owner: 'yukims19',
+        name: 'docs',
+        sourceBranch: branchName,
+        title: title,
+        body: null,
+        destinationBranch: 'master'
+      })
+    })
+}
 
 class Endpoints extends React.Component {
   constructor(props) {
@@ -165,18 +178,19 @@ class Endpoints extends React.Component {
       spec: spec,
       isLoggedInGitHub: null,
       prTitle: null,
-      prDetail: null
+      prDetail: null,
+      isModalOpen: true
     }
   }
 
   componentDidMount() {
     const auth = new OneGraphAuth({
       appId: APP_ID,
-      oneGraphOrigin: "http://serve.onegraph.io:8082",
+      oneGraphOrigin: 'http://serve.onegraph.io:8082'
     })
 
     auth.isLoggedIn('github').then(isLoggedIn => {
-      console.log("Is logged in: ", isLoggedIn);
+      console.log('Is logged in: ', isLoggedIn)
       if (isLoggedIn) {
         this.setState(oldState => {
           return { ...oldState, auth: auth, isLoggedInGitHub: isLoggedIn }
@@ -236,9 +250,9 @@ class Endpoints extends React.Component {
   }
 
   makeNewPR() {
-    console.log('New PR', this.state.spec, "<--- the spec")
+    console.log('New PR', this.state.spec, '<--- the spec')
     window.ogAuth = this.state.auth
-    submitFullPr(this.state.auth, this.state.prTitle, this.state.spec);
+    submitFullPr(this.state.auth, this.state.prTitle, this.state.spec)
 
     this.setState({
       isModalOpen: false,
@@ -287,12 +301,11 @@ class Endpoints extends React.Component {
               onClick={e => this.toggleModal()}
             />
             <form
-
               style={{
-                width: '300px',
-                height: '220px',
+                width: '400px',
                 backgroundColor: 'white',
-                borderRadius: '5px',
+                borderRadius: '4px',
+                padding: '24px',
                 position: 'fixed',
                 top: '50%',
                 left: '50%',
@@ -302,101 +315,80 @@ class Endpoints extends React.Component {
               <label
                 style={{
                   width: '80%',
-                  margin: '16px auto 0px auto',
+                  margin: 'auto',
                   display: 'block',
                   fontSize: '16px'
                 }}
               >
                 PR Title:
               </label>
-              <input
-                onChange={e => this.updatePRInfo('title', e.target.value)}
+              <div
                 style={{
                   width: '80%',
-                  margin: 'auto',
-                  display: 'block',
-                  fontSize: '16px',
-                  borderRadius: '5px',
-                  border: '1px solid #cfcfcf',
-                  padding: '4px 8px'
+                  margin: '0px auto 16px auto',
+                  display: 'grid'
                 }}
-                required
-              />
+              >
+                <Input
+                  onChange={e => this.updatePRInfo('title', e)}
+                  required
+                  placeholder="ex. Grammar Error"
+                />
+              </div>
               <label
                 style={{
                   width: '80%',
-                  margin: '16px auto 0px auto',
+                  margin: 'auto',
                   display: 'block',
                   fontSize: '16px'
                 }}
               >
                 PR Detail:
               </label>
-              <input
-                onChange={e => this.updatePRInfo('detail', e.target.value)}
+              <div
                 style={{
                   width: '80%',
+                  margin: '0px auto 16px auto',
+                  display: 'grid'
+                }}
+              >
+                <Input
+                  onChange={e => this.updatePRInfo('detail', e.target.value)}
+                  placeholder="ex. Fix grammar error"
+                />
+              </div>
+              <Button
+                style={{
                   margin: 'auto',
                   display: 'block',
-                  fontSize: '16px',
-                  borderRadius: '5px',
-                  border: '1px solid #cfcfcf',
-                  padding: '4px 8px'
+                  marginTop: '32px'
                 }}
-              />
-              <button
                 onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                this.makeNewPR()}}
-                style={{
-                  fontSize: '16px',
-                  borderRadius: '3px',
-                  backgroundColor: '#444444',
-                  color: 'white',
-                  margin: '32px auto',
-                  display: 'block',
-                  padding: '4px 8px',
-                  border: 'none',
-                  boxShadow: '0px 2px 4px #a5a5a5'
+                  e.preventDefault()
+                  e.stopPropagation()
+                  this.makeNewPR()
                 }}
               >
                 Submit PR
-              </button>
+              </Button>
             </form>
           </div>
         ) : null}
         {this.state.auth ? (
           this.state.isLoggedInGitHub ? (
-            <button
+            <Button
               onClick={_e => this.toggleModal()}
               style={{
-                fontSize: '16px',
-                borderRadius: '3px',
-                backgroundColor: '#444444',
-                color: 'white',
-                display: 'block',
-                padding: '4px 8px',
-                border: 'none',
-                boxShadow: '0px 2px 4px #a5a5a5',
                 position: 'fixed',
                 top: '90px',
                 right: '15px'
               }}
             >
               Save
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               style={{
-                fontSize: '16px',
-                borderRadius: '3px',
-                backgroundColor: '#444444',
-                color: 'white',
-                display: 'block',
-                padding: '4px 8px',
-                border: 'none',
-                boxShadow: '0px 2px 4px #a5a5a5',
                 position: 'fixed',
                 top: '90px',
                 right: '15px'
@@ -404,7 +396,7 @@ class Endpoints extends React.Component {
               onClick={_e => this.handleGitHubLogin()}
             >
               Log In to GitHub
-            </button>
+            </Button>
           )
         ) : null}
         <Deployments2 spec={this.state.spec} updateSpec={updateSpec} />
