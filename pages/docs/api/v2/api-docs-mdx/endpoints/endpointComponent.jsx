@@ -15,39 +15,115 @@ import Example from '~/components/example'
 import Request from '~/components/api/request'
 import Heading from '~/components/text/linked-heading'
 
+const zeitUrlPathToOpenapiUrl = url => url.replace(/:(\w+)/g, '{$1}')
 // Copy/pasted from docs.js
-const DocH3 = ({ children }) => (
-  <div>
-    <Heading lean offsetTop={175}>
-      <H3>{children}</H3>
-    </Heading>
-    <style jsx>{`
-      div {
-        margin: 40px 0 0 0;
-      }
-    `}</style>
-  </div>
-)
+class DocH3 extends React.Component {
+  //}= ({ isEditting, handleClick, handleSave, rowTitle, children }) => {
+  constructor(props) {
+    super(props)
+    this.state = { newTitle: this.props.rowTitle }
+  }
+
+  updateNewTitle(title) {
+    this.setState({ newTitle: title })
+  }
+
+  render() {
+    return this.props.isEditting ? (
+      <div style={{ backgroundColor: '#cfcfcf' }}>
+        <textarea
+          style={{ width: '100%' }}
+          onChange={e => this.updateNewTitle(e.target.value)}
+        >
+          {this.state.newTitle}
+        </textarea>
+        <button
+          type="submit"
+          onClick={_e => this.props.handleSave(this.state.newTitle)}
+        >
+          Save
+        </button>
+        <hr />
+        <small>Live View:</small>
+        <H3>
+          {capitalize(this.props.operationIdFriendlyName(this.state.newTitle))}
+        </H3>
+      </div>
+    ) : (
+      <div onDoubleClick={e => this.props.handleClick()}>
+        <Heading lean offsetTop={175}>
+          <H3>{this.props.children}</H3>
+        </Heading>
+        <style jsx>
+          {`
+            div {
+              margin: 40px 0 0 0;
+            }
+          `}
+        </style>
+      </div>
+    )
+  }
+}
 
 const DocH4 = ({ children }) => (
   <div>
     <Heading lean offsetTop={175}>
       <H4>{children}</H4>
     </Heading>
-    <style jsx>{`
-      div {
-        margin: 40px 0 0 0;
-      }
-    `}</style>
+    <style jsx>
+      {`
+        div {
+          margin: 40px 0 0 0;
+        }
+      `}
+    </style>
   </div>
 )
 
 const CodeMarkdown = ({ language, value }) => (
   <Code lang={language}>{value}</Code>
 )
-const DocMarkdown = source => (
-  <Markdown source={source} renderers={mdxComponents} />
-)
+
+class DocMarkdown extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { newDescription: this.props.rowDescription }
+  }
+
+  updateNewDescription(description) {
+    this.setState({ newDescription: description })
+  }
+
+  render() {
+    return this.props.isEditting ? (
+      <div style={{ backgroundColor: '#cfcfcf' }}>
+        <textarea
+          style={{ width: '100%' }}
+          onChange={e => this.updateNewDescription(e.target.value)}
+        >
+          {this.state.newDescription}
+        </textarea>
+        <button
+          type="submit"
+          onClick={_e => this.props.handleSave(this.state.newDescription)}
+        >
+          Save
+        </button>
+        <hr />
+        <small>Live View:</small>
+        <Markdown
+          source={this.state.newDescription}
+          renderers={mdxComponents}
+        />
+      </div>
+    ) : (
+      <div onDoubleClick={e => this.props.handleClick()}>
+        <Markdown source={this.props.children} renderers={mdxComponents} />
+      </div>
+    )
+  }
+}
 
 const Headings = ({ level, children }) => {
   switch (level) {
@@ -203,8 +279,8 @@ const tableBody = (spec, properties, requiredFieldNames) => {
         const propertyDescription = property.description
           ? property.description
           : property['$ref']
-          ? resolveRefObject(spec, property['$ref']).description
-          : null
+            ? resolveRefObject(spec, property['$ref']).description
+            : null
 
         const requiredColumn = Array.isArray(requiredFieldNames) ? (
           <td className="table-cell">
@@ -230,7 +306,16 @@ const tableBody = (spec, properties, requiredFieldNames) => {
 
             {requiredColumn}
 
-            <td className="table-cell">{DocMarkdown(propertyDescription)}</td>
+            <td className="table-cell">
+              <DocMarkdown
+                isEditting={false}
+                handleClick={() => null}
+                rowTitle={null}
+                handleSave={value => null}
+              >
+                {propertyDescription}
+              </DocMarkdown>
+            </td>
           </tr>
         )
       })}
@@ -291,88 +376,240 @@ const objectTable = (tableType, spec, schema) => {
 }
 
 // "  RemoveUserFromTeamV1  " => "remove user from team"
-const operationIdFriendlyName = operationId =>
-  operationId
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/V[0-9]/g, '')
-    .toLowerCase()
-    .trim()
 
-const operationDetails = (spec, operation, method, url) => {
-  const contentType = 'application/json'
+class Clock extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { date: new Date() }
+  }
 
-  /* FIXME: Need to normalize the capitalization of operationId */
-  const operationFriendlyName = operationIdFriendlyName(operation.operationId)
-  const operationAnchor =
-    '#endpoints/domains/' + operationFriendlyName.replace(/\s+/g, '-')
+  render() {
+    return (
+      <div>
+        <h1>Hello, world!</h1>
+        <h2>It is {this.state.date.toLocaleTimeString()}.</h2>
+      </div>
+    )
+  }
+}
 
-  const requestBody =
-    operation.requestBody && operation.requestBody.content[contentType]
+class OperationDetails extends React.Component {
+  //(this.props.spec, operation, method, url)
+  constructor(props) {
+    super(props)
+    this.state = {
+      pendingChanges: 0,
+      isH3Editting: false,
+      isDescriptionEditting: false
+    }
 
-  const requestBodySchema = requestBody && requestBody.schema
+    this.contentType = 'application/json'
+    /* FIXME: Need to normalize the capitalization of operationId */
+    this.operationFriendlyName = this.operationIdFriendlyName(
+      this.props.operation.operationId
+    )
 
-  const successResponseBody =
-    operation.responses[200] && operation.responses[200].content[contentType]
+    this.operationAnchor =
+      '#endpoints/domains/' + this.operationFriendlyName.replace(/\s+/g, '-')
 
-  const successResponseBodySchema =
-    successResponseBody && successResponseBody.schema
+    this.requestBody =
+      this.props.operation.requestBody &&
+      this.props.operation.requestBody.content[this.contentType]
 
-  const requestExamples = (requestBody && requestBody.examples) || {}
-  const successResponseExamples =
-    (successResponseBody && successResponseBody.examples) || {}
+    this.requestBodySchema = this.requestBody && this.requestBody.schema
 
-  // FIXME: Where do props come from for examples?
-  const props = {}
+    this.successResponseBody =
+      this.props.operation.responses[200] &&
+      this.props.operation.responses[200].content[this.contentType]
 
-  return (
-    <div style={{ border: '1px solid black' }}>
-      <DocH3>
-        <a href={operationAnchor} className="jsx-2892434432">
-          {capitalize(operationFriendlyName)}
-        </a>
-      </DocH3>
-      <Endpoint method={method} url={url} />
-      {DocMarkdown(operation.description)}
-      {requestBodySchema && objectTable('request', spec, requestBodySchema)}
-      {successResponseBodySchema &&
-        objectTable('response', spec, successResponseBodySchema)}
-      {Object.keys(requestExamples).map(exampleName => {
-        const exampleRequest = requestExamples[exampleName]
-        const exampleResponse = successResponseExamples[exampleName]
+    this.successResponseBodySchema =
+      this.successResponseBody && this.successResponseBody.schema
 
-        return (
-          <Example>
-            <span>
-              {DocMarkdown((exampleRequest.summary || 'Example request') + ':')}
-            </span>
-            <Request
-              url={`https://api.zeit.co${url}`}
-              method={method.toUpperCase()}
-              headers={{
-                Authorization: `Bearer ${
-                  props.testingToken ? props.testingToken.token : '$TOKEN'
-                }`,
-                'Content-Type': contentType
-              }}
-              body={exampleRequest.value}
-            />
-            {!exampleResponse ? null : (
-              <>
-                <span>
-                  {DocMarkdown(
-                    (exampleResponse.summary || 'Example response') + ':'
-                  )}
-                </span>
-                <Code lang="json">
-                  {JSON.stringify(exampleResponse.value, null, 2)}
-                </Code>
-              </>
-            )}
-          </Example>
-        )
-      })}
-    </div>
-  )
+    this.requestExamples = (this.requestBody && this.requestBody.examples) || {}
+    this.successResponseExamples =
+      (this.successResponseBody && this.successResponseBody.examples) || {}
+  }
+
+  operationIdFriendlyName(operationId) {
+    return operationId
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/V[0-9]/g, '')
+      .toLowerCase()
+      .trim()
+  }
+
+  toggleEditMood(field) {
+    console.log('clicked', field)
+    switch (field) {
+      case 'title':
+        this.setState({ isH3Editting: !this.state.isH3Editting })
+        break
+      case 'description':
+        this.setState({
+          isDescriptionEditting: !this.state.isDescriptionEditting
+        })
+        break
+      default:
+        console.log('Wrong Field')
+    }
+  }
+
+  modifySpec(newSpec, field, value) {
+    console.log(
+      'DOES THIS GET CONSOLE',
+      field,
+      value,
+      this.props.url,
+      this.props.method
+    )
+
+    switch (field) {
+      case 'title':
+        newSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+          this.props.method.toLowerCase()
+        ].operationId = value
+        this.setState({ isH3Editting: false })
+        return newSpec
+
+      case 'description':
+        newSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+          this.props.method.toLowerCase()
+        ].description = value
+
+        this.setState({
+          isDescriptionEditting: false
+        })
+        return newSpec
+
+      default:
+        console.log('Unrecognized Field to update: break' + field)
+        return newSpec
+    }
+  }
+
+  render() {
+    const { updateSpec } = this.props
+
+    console.log('My updater', this.modifySpec)
+    return (
+      <div style={{ border: '1px solid black' }}>
+        <DocH3
+          isEditting={this.state.isH3Editting}
+          handleClick={() => this.toggleEditMood('title')}
+          rowTitle={
+            this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+              this.props.method.toLowerCase()
+            ].operationId
+          }
+          handleSave={value =>
+            updateSpec('Title updated', spec => {
+              return this.modifySpec(spec, 'title', value)
+            })
+          }
+          operationIdFriendlyName={this.operationIdFriendlyName}
+        >
+          {capitalize(
+            this.operationIdFriendlyName(
+              this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+                this.props.method.toLowerCase()
+              ].operationId
+            )
+          )}
+        </DocH3>
+        <Endpoint method={this.props.method} url={this.props.url} />
+        <DocMarkdown
+          isEditting={this.state.isDescriptionEditting}
+          handleClick={() => this.toggleEditMood('description')}
+          rowDescription={
+            this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+              this.props.method.toLowerCase()
+            ].description
+          }
+          handleSave={value =>
+            updateSpec('Description updated', spec =>
+              this.modifySpec(spec, 'description', value)
+            )
+          }
+        >
+          {this.props.operation.description}
+        </DocMarkdown>
+        {this.requestBodySchema &&
+          objectTable('request', this.props.spec, this.requestBodySchema)}
+        {this.successResponseBodySchema &&
+          objectTable(
+            'response',
+            this.props.spec,
+            this.successResponseBodySchema
+          )}
+        {Object.keys(this.requestExamples).map(exampleName => {
+          const exampleRequest = this.requestExamples[exampleName]
+          const exampleResponse = this.successResponseExamples[exampleName]
+
+          return (
+            <Example>
+              <span>
+                <DocMarkdown
+                  isEditting={false}
+                  handleClick={() => this.toggleEditMood('description')}
+                  rowTitle={
+                    this.props.spec.paths[
+                      zeitUrlPathToOpenapiUrl(this.props.url)
+                    ][this.props.method.toLowerCase()].description
+                  }
+                  handleSave={value =>
+                    updateSpec('Description updated', spec =>
+                      this.modifySpec('description', value)
+                    )
+                  }
+                >
+                  {(exampleRequest.summary || 'Example request') + ':'}
+                  this.props.operation.description
+                </DocMarkdown>
+              </span>
+              <Request
+                url={`https://api.zeit.co${this.props.url}`}
+                method={this.props.method.toUpperCase()}
+                headers={{
+                  Authorization: `Bearer ${
+                    this.props.testingToken
+                      ? this.props.testingToken.token
+                      : '$TOKEN'
+                  }`,
+                  'Content-Type': this.contentType
+                }}
+                body={exampleRequest.value}
+              />
+              {!exampleResponse ? null : (
+                <>
+                  <span>
+                    <DocMarkdown
+                      isEditting={false}
+                      handleClick={() => this.toggleEditMood('description')}
+                      rowTitle={
+                        this.props.spec.paths[
+                          zeitUrlPathToOpenapiUrl(this.props.url)
+                        ][this.props.method.toLowerCase()].description
+                      }
+                      handleSave={value =>
+                        updateSpec('Description updated', spec =>
+                          this.modifySpec('description', value)
+                        )
+                      }
+                    >
+                      {(exampleResponse.summary || 'Example response') + ':'}
+                    </DocMarkdown>
+                  </span>
+                  <Code lang="json">
+                    {JSON.stringify(exampleResponse.value, null, 2)}
+                  </Code>
+                </>
+              )}
+            </Example>
+          )
+        })}
+      </div>
+    )
+  }
 }
 
 const ItemDetail = ({ itemName, description }) => {
@@ -399,9 +636,9 @@ const ItemDetail = ({ itemName, description }) => {
 /* Convert a Zeit-docs style url to the openapi path name, e.g.
 "/v1/teams/:id/members/:userId" => "/v1/teams/{id}/members/{userId}"
 */
-const zeitUrlPathToOpenapiUrl = url => url.replace(/:(\w+)/g, '{$1}')
 
-const Operation = ({ spec, method, url }) => {
+const Operation = props => {
+  const { spec, method, url, updateSpec } = props
   const openapiUrl = zeitUrlPathToOpenapiUrl(url)
   const httpVerb = method.toLowerCase()
   // pathObj will have http methods as keys in an openapi spec
@@ -409,7 +646,13 @@ const Operation = ({ spec, method, url }) => {
   const operation = openapiPathObj && openapiPathObj[httpVerb]
 
   return operation ? (
-    operationDetails(spec, operation, method, url)
+    <OperationDetails
+      spec={spec}
+      operation={operation}
+      method={method}
+      url={url}
+      updateSpec={updateSpec}
+    />
   ) : (
     <h1 style={{ backgroundColor: fixmeRed }}>
       Missing operation definition for {`${url}.${method}`}

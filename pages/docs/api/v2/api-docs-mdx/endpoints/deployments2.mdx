@@ -5,26 +5,25 @@ import { GenericLink, HelpLink } from '~/components/text/link'
 import { P, PDIV } from '~/components/text/paragraph'
 import Request from '~/components/api/request'
 import EndpointComponent from './endpointComponent.jsx'
-import spec from './entireSpec.json'
 
 ## Deployments
 
-<EndpointComponent spec={spec} method="POST" url="/v6/now/deployments" />
-<EndpointComponent spec={spec} method="POST" url="/v2/now/files" />
-<EndpointComponent spec={spec} method="GET" url="/v3/now/deployments" />
-<EndpointComponent spec={spec} method="DELETE" url="/v6/now/deployments/:id" />
+<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v6/now/deployments" />
+<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v2/now/files" />
+<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="GET" url="/v3/now/deployments" />
+<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="DELETE" url="/v6/now/deployments/:id" />
 <EndpointComponent
-  spec={spec}
+  spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/files"
 />
 <EndpointComponent
-  spec={spec}
+  spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/files/:fileId"
 />
 <EndpointComponent
-  spec={spec}
+  spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/builds"
 />
