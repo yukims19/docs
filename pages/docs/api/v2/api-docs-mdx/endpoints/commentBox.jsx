@@ -142,6 +142,18 @@ class CommentBox extends React.Component {
     })
   }
 
+  toggleCommentBox() {
+    this.setState({ isCompact: !this.state.isCompact })
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.focusedPR !== prevProps.focusedPR) {
+      this.setState({
+        commentsNodes: this.props.prInfo.comments.nodes
+      })
+    }
+  }
+
   render() {
     return (
       <div>
