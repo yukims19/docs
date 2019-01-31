@@ -14,9 +14,10 @@ import OneGraphAuth from 'onegraph-auth'
 import Button from '~/components/buttons'
 import Input from '~/components/input'
 import { Menu, MenuItem, MenuDivider } from '~/components/menu'
+import CommentBox from './commentBox.jsx'
 
-const _APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
-const APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
+const APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
+const _APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
 
 const getFileShaQuery = `query getFileSha($name: String!, $owner: String!, $branchAndFilePath: String!) {
   gitHub {
@@ -387,6 +388,12 @@ class Endpoints extends React.Component {
 
     return (
       <>
+        {this.state.isViewingPR ? (
+          <div style={{ position: 'fixed', bottom: '50px', right: '100px' }}>
+            <CommentBox prInfo={this.state.focusedPR} />
+            <a onClick={() => this.showOriginalDoc()}>See Original Doc</a>
+          </div>
+        ) : null}
         <Menu
           tip
           active={this.state.isPRListActive}
