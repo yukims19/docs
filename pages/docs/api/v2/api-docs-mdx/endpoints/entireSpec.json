@@ -30,7 +30,7 @@
                 "schema": {
                   "properties": {
                     "token": {
-                      "description": "The token used to verify the user accepted the login request.",
+                      "description": "The actual token used to verify the user accepted the login request.",
                       "type": "string"
                     },
                     "securityCode": {
