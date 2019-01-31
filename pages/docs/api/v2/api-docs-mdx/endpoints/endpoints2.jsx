@@ -286,6 +286,14 @@ class Endpoints extends React.Component {
     auth.isLoggedIn('github').then(isLoggedIn => {
       console.log('Is logged in: ', isLoggedIn)
       if (isLoggedIn) {
+        let prNodes = getPRList(auth).then(json => {
+          console.log(json)
+          let jsonData = json
+          let PRNodes = jsonData.data.gitHub.repository.pullRequests.nodes
+          this.setState({ prList: PRNodes }, () =>
+            console.log('PRLIst:', this.state.prList)
+          )
+        })
         this.setState(oldState => {
           return { ...oldState, auth: auth, isLoggedInGitHub: isLoggedIn }
         })
@@ -294,15 +302,6 @@ class Endpoints extends React.Component {
           return { ...oldState, auth: auth, isLoggedInGitHub: false }
         })
       }
-    })
-
-    let prNodes = getPRList(auth).then(json => {
-      console.log(json)
-      let jsonData = json
-      let PRNodes = jsonData.data.gitHub.repository.pullRequests.nodes
-      this.setState({ prList: PRNodes }, () =>
-        console.log('PRLIst:', this.state.prList)
-      )
     })
 
     //window.testIt = this.makeNewPR.bind(this)
@@ -316,8 +315,11 @@ class Endpoints extends React.Component {
       .then(() => {
         auth.isLoggedIn('github').then(isLoggedIn => {
           if (isLoggedIn) {
-            this.setState({
-              isLoggedInGitHub: isLoggedIn
+            let prNodes = getPRList(auth).then(json => {
+              console.log(json)
+              let jsonData = json
+              let PRNodes = jsonData.data.gitHub.repository.pullRequests.nodes
+              this.setState({ prList: PRNodes, isLoggedInGitHub: isLoggedIn })
             })
           } else {
             this.setState({
@@ -386,14 +388,19 @@ class Endpoints extends React.Component {
           right: '300px'
         }}
       >
-        <Button onClick={() => this.togglePRList()}>Requested PRs</Button>
+        <Button onClick={() => this.togglePRList()}>
+          {this.state.focusedPR ? (
+            <li>{this.state.focusedPR.title}</li>
+          ) : (
+            'Requested PRs'
+          )}
+        </Button>
         {menu}
       </div>
     )
   }
 
   applyPRData(prInfo) {
-    alert('This action will discard all un-saved changes')
     console.log(prInfo)
     getPRSingleFile(
       this.state.auth,
@@ -438,7 +445,7 @@ class Endpoints extends React.Component {
     return (
       <>
         {this.state.isViewingPR ? (
-          <div style={{ position: 'fixed', bottom: '50px', right: '100px' }}>
+          <div style={{ position: 'fixed', bottom: '20px', right: '50px' }}>
             <CommentBox
               prInfo={this.state.focusedPR}
               auth={this.state.auth}
@@ -446,32 +453,35 @@ class Endpoints extends React.Component {
               repoName={repoName}
               focusedPR={this.state.focusedPR}
               graphqler={graphqler}
+              showOriginalDoc={() => this.showOriginalDoc()}
             />
-            <a onClick={() => this.showOriginalDoc()}>Restore Original Doc</a>
           </div>
         ) : null}
-        <Menu
-          tip
-          active={this.state.isPRListActive}
-          onClickOutside={this.handleClickOutsideMenu}
-          render={this.renderMenuTrigger}
-          style={{ minWidth: 200, maxHeight: 230, overflow: 'auto' }}
-        >
-          {this.state.prList
-            ? this.state.prList.map((pr, idx) => {
-                return (
-                  <div>
-                    {idx === 0 ? null : <MenuDivider />}
-                    <MenuItem>
-                      <a onClick={() => this.applyPRData(pr)}>
-                        <strong>{pr.title}</strong>
-                      </a>
-                    </MenuItem>
-                  </div>
-                )
-              })
-            : null}
-        </Menu>
+        {this.state.isLoggedInGitHub ? (
+          <Menu
+            tip
+            active={this.state.isPRListActive}
+            onClickOutside={this.handleClickOutsideMenu}
+            render={this.renderMenuTrigger}
+            style={{ minWidth: 200, maxHeight: 230, overflow: 'auto' }}
+          >
+            {this.state.prList
+              ? this.state.prList.map((pr, idx) => {
+                  return (
+                    <div>
+                      {idx === 0 ? null : <MenuDivider />}
+                      <MenuItem>
+                        <a onClick={() => this.applyPRData(pr)}>
+                          <strong>{pr.title}</strong>
+                        </a>
+                      </MenuItem>
+                    </div>
+                  )
+                })
+              : null}
+          </Menu>
+        ) : null}
+
         {this.state.isModalOpen ? (
           <div
             style={{
