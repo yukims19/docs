@@ -16,6 +16,14 @@ import Request from '~/components/api/request'
 import Heading from '~/components/text/linked-heading'
 
 const zeitUrlPathToOpenapiUrl = url => url.replace(/:(\w+)/g, '{$1}')
+const prChangeDetector = (oldData, newData) => {
+  if (!(oldData === newData)) {
+    return { backgroundColor: '#fff8d5' }
+  } else {
+    return null
+  }
+}
+
 // Copy/pasted from docs.js
 class DocH3 extends React.Component {
   //}= ({ isEditting, handleClick, handleSave, rowTitle, children }) => {
@@ -492,46 +500,68 @@ class OperationDetails extends React.Component {
 
     return (
       <div style={{ border: '1px solid black' }}>
-        <DocH3
-          isEditting={this.state.isH3Editting}
-          handleClick={() => this.toggleEditMood('title')}
-          rowTitle={
+        <div
+          style={prChangeDetector(
+            this.props.oldSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+              this.props.method.toLowerCase()
+            ].operationId,
             this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
               this.props.method.toLowerCase()
             ].operationId
-          }
-          handleSave={value =>
-            updateSpec('Title updated', spec => {
-              return this.modifySpec(spec, 'title', value)
-            })
-          }
-          operationIdFriendlyName={this.operationIdFriendlyName}
+          )}
         >
-          {capitalize(
-            this.operationIdFriendlyName(
+          <DocH3
+            isEditting={this.state.isH3Editting}
+            handleClick={() => this.toggleEditMood('title')}
+            rowTitle={
               this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
                 this.props.method.toLowerCase()
               ].operationId
-            )
-          )}
-        </DocH3>
+            }
+            handleSave={value =>
+              updateSpec('Title updated', spec => {
+                return this.modifySpec(spec, 'title', value)
+              })
+            }
+            operationIdFriendlyName={this.operationIdFriendlyName}
+          >
+            {capitalize(
+              this.operationIdFriendlyName(
+                this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+                  this.props.method.toLowerCase()
+                ].operationId
+              )
+            )}
+          </DocH3>
+        </div>
         <Endpoint method={this.props.method} url={this.props.url} />
-        <DocMarkdown
-          isEditting={this.state.isDescriptionEditting}
-          handleClick={() => this.toggleEditMood('description')}
-          rowDescription={
+        <div
+          style={prChangeDetector(
+            this.props.oldSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+              this.props.method.toLowerCase()
+            ].description,
             this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
               this.props.method.toLowerCase()
             ].description
-          }
-          handleSave={value =>
-            updateSpec('Description updated', spec =>
-              this.modifySpec(spec, 'description', value)
-            )
-          }
+          )}
         >
-          {this.props.operation.description}
-        </DocMarkdown>
+          <DocMarkdown
+            isEditting={this.state.isDescriptionEditting}
+            handleClick={() => this.toggleEditMood('description')}
+            rowDescription={
+              this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+                this.props.method.toLowerCase()
+              ].description
+            }
+            handleSave={value =>
+              updateSpec('Description updated', spec =>
+                this.modifySpec(spec, 'description', value)
+              )
+            }
+          >
+            {this.props.operation.description}
+          </DocMarkdown>
+        </div>
         {this.requestBodySchema &&
           objectTable('request', this.props.spec, this.requestBodySchema)}
         {this.successResponseBodySchema &&
@@ -637,7 +667,7 @@ const ItemDetail = ({ itemName, description }) => {
 */
 
 const Operation = props => {
-  const { spec, method, url, updateSpec } = props
+  const { oldSpec, spec, method, url, updateSpec } = props
   const openapiUrl = zeitUrlPathToOpenapiUrl(url)
   const httpVerb = method.toLowerCase()
   // pathObj will have http methods as keys in an openapi spec
@@ -646,6 +676,7 @@ const Operation = props => {
 
   return operation ? (
     <OperationDetails
+      oldSpec={oldSpec}
       spec={spec}
       operation={operation}
       method={method}

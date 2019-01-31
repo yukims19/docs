@@ -8,21 +8,24 @@ import EndpointComponent from './endpointComponent.jsx'
 
 ## Deployments
 
-<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v6/now/deployments" />
-<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v2/now/files" />
-<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="GET" url="/v3/now/deployments" />
-<EndpointComponent spec={props.spec} updateSpec={props.updateSpec} method="DELETE" url="/v6/now/deployments/:id" />
+<EndpointComponent oldSpec={props.oldSpec} spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v6/now/deployments" />
+<EndpointComponent oldSpec={props.oldSpec} spec={props.spec} updateSpec={props.updateSpec} method="POST" url="/v2/now/files" />
+<EndpointComponent oldSpec={props.oldSpec} spec={props.spec} updateSpec={props.updateSpec} method="GET" url="/v3/now/deployments" />
+<EndpointComponent oldSpec={props.oldSpec} spec={props.spec} updateSpec={props.updateSpec} method="DELETE" url="/v6/now/deployments/:id" />
 <EndpointComponent
+oldSpec={props.oldSpec}
   spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/files"
 />
 <EndpointComponent
+oldSpec={props.oldSpec}
   spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/files/:fileId"
 />
 <EndpointComponent
+oldSpec={props.oldSpec}
   spec={props.spec} updateSpec={props.updateSpec}
   method="GET"
   url="/v5/now/deployments/:id/builds"
