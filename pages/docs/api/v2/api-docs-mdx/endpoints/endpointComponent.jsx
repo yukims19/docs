@@ -408,7 +408,9 @@ class OperationDetails extends React.Component {
     this.state = {
       pendingChanges: 0,
       isH3Editting: false,
-      isDescriptionEditting: false
+      isDescriptionEditting: false,
+      showOriginalTitle: false,
+      showOriginalDescription: false
     }
 
     this.contentType = 'application/json'
@@ -495,6 +497,21 @@ class OperationDetails extends React.Component {
     }
   }
 
+  toggleDataStatus(type) {
+    switch (type) {
+      case 'title':
+        this.setState({ showOriginalTitle: !this.state.showOriginalTitle })
+        break
+      case 'description':
+        this.setState({
+          showOriginalDescription: !this.state.showOriginalDescription
+        })
+        break
+      default:
+        console.log('Unrecognized field:' + type)
+    }
+  }
+
   render() {
     const { updateSpec } = this.props
 
@@ -510,6 +527,30 @@ class OperationDetails extends React.Component {
             ].operationId
           )}
         >
+          {this.props.oldSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+            this.props.method.toLowerCase()
+          ].operationId !==
+          this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+            this.props.method.toLowerCase()
+          ].operationId ? (
+            this.state.showOriginalTitle ? (
+              <button
+                onClick={_e => {
+                  this.toggleDataStatus('title')
+                }}
+              >
+                Show PR Data
+              </button>
+            ) : (
+              <button
+                onClick={_e => {
+                  this.toggleDataStatus('title')
+                }}
+              >
+                Show Original Data
+              </button>
+            )
+          ) : null}
           <DocH3
             isEditting={this.state.isH3Editting}
             handleClick={() => this.toggleEditMood('title')}
@@ -525,13 +566,21 @@ class OperationDetails extends React.Component {
             }
             operationIdFriendlyName={this.operationIdFriendlyName}
           >
-            {capitalize(
-              this.operationIdFriendlyName(
-                this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
-                  this.props.method.toLowerCase()
-                ].operationId
-              )
-            )}
+            {this.state.showOriginalTitle
+              ? capitalize(
+                  this.operationIdFriendlyName(
+                    this.props.oldSpec.paths[
+                      zeitUrlPathToOpenapiUrl(this.props.url)
+                    ][this.props.method.toLowerCase()].operationId
+                  )
+                )
+              : capitalize(
+                  this.operationIdFriendlyName(
+                    this.props.spec.paths[
+                      zeitUrlPathToOpenapiUrl(this.props.url)
+                    ][this.props.method.toLowerCase()].operationId
+                  )
+                )}
           </DocH3>
         </div>
         <Endpoint method={this.props.method} url={this.props.url} />
@@ -545,13 +594,42 @@ class OperationDetails extends React.Component {
             ].description
           )}
         >
+          {this.props.oldSpec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+            this.props.method.toLowerCase()
+          ].description !==
+          this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
+            this.props.method.toLowerCase()
+          ].description ? (
+            this.state.showOriginalDescription ? (
+              <button
+                onClick={_e => {
+                  this.toggleDataStatus('description')
+                }}
+              >
+                Show PR Data
+              </button>
+            ) : (
+              <button
+                onClick={_e => {
+                  this.toggleDataStatus('description')
+                }}
+              >
+                Show Original Data
+              </button>
+            )
+          ) : null}
+
           <DocMarkdown
             isEditting={this.state.isDescriptionEditting}
             handleClick={() => this.toggleEditMood('description')}
             rowDescription={
-              this.props.spec.paths[zeitUrlPathToOpenapiUrl(this.props.url)][
-                this.props.method.toLowerCase()
-              ].description
+              this.state.showOriginalDescription
+                ? this.props.oldSpec.paths[
+                    zeitUrlPathToOpenapiUrl(this.props.url)
+                  ][this.props.method.toLowerCase()].description
+                : this.props.spec.paths[
+                    zeitUrlPathToOpenapiUrl(this.props.url)
+                  ][this.props.method.toLowerCase()].description
             }
             handleSave={value =>
               updateSpec('Description updated', spec =>
@@ -559,7 +637,11 @@ class OperationDetails extends React.Component {
               )
             }
           >
-            {this.props.operation.description}
+            {this.state.showOriginalDescription
+              ? this.props.oldSpec.paths[
+                  zeitUrlPathToOpenapiUrl(this.props.url)
+                ][this.props.method.toLowerCase()].description
+              : this.props.operation.description}
           </DocMarkdown>
         </div>
         {this.requestBodySchema &&
