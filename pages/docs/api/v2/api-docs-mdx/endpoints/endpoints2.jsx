@@ -147,6 +147,7 @@ const getPRListQuery = `query allPullRequests(
             id
             target {
               id
+              oid
               repository {
                 owner {
                   login
@@ -177,6 +178,130 @@ const getPRSingleFileQuery = `query getFileContents(
   }
 }
 `
+
+const mergePRMutation = `mutation mergePullRequest(
+  $owner: String!
+  $name: String!
+  $number: Int!
+  $sha: String!
+  $title: String!
+) {
+  gitHub {
+    ogMergePullRequest(
+      input: {
+        repoOwner: $owner
+        repoName: $name
+        number: $number
+        sha: $sha
+        commitTitle: $title
+      }
+    ) {
+      pullRequest {
+        id
+        title
+        merged
+        state
+      }
+    }
+  }
+}`
+
+const formStyle = {
+  width: '400px',
+  backgroundColor: 'white',
+  borderRadius: '4px',
+  padding: '24px',
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)'
+}
+
+const labelStyle = {
+  width: '80%',
+  margin: 'auto',
+  display: 'block',
+  fontSize: '16px'
+}
+
+const InputWrapperStyle = {
+  width: '80%',
+  margin: '0px auto 16px auto',
+  display: 'grid'
+}
+
+const formPR = (updatePRInfo, makeNewPR) => {
+  return (
+    <form style={formStyle}>
+      <label style={labelStyle}>PR Title</label>
+      <div style={InputWrapperStyle}>
+        <Input
+          onChange={e => updatePRInfo('title', e)}
+          required
+          placeholder="ex. Grammar Error"
+        />
+      </div>
+      <label style={labelStyle}>PR Detail</label>
+      <div style={InputWrapperStyle}>
+        <Input
+          onChange={e => updatePRInfo('detail', e)}
+          placeholder="ex. Fix grammar error"
+        />
+      </div>
+      <Button
+        style={{
+          margin: 'auto',
+          display: 'block',
+          marginTop: '32px'
+        }}
+        onClick={e => {
+          //          e.preventDefault()
+          //          e.stopPropagation()
+          makeNewPR()
+        }}
+      >
+        Submit PR
+      </Button>
+    </form>
+  )
+}
+
+const formMerge = (updateMergeInfo, mergeToMaster, mergeTitle) => {
+  return (
+    <form style={formStyle}>
+      <label style={labelStyle}>Commit Title</label>
+      <div style={InputWrapperStyle}>
+        <Input
+          onChange={e => updateMergeInfo('title', e)}
+          required
+          placeholder="ex. Merge pull request #1 from username/branch"
+          value={mergeTitle}
+        />
+      </div>
+      <label style={labelStyle}>Commit Detail</label>
+      <div style={InputWrapperStyle}>
+        <Input
+          onChange={e => updateMergeInfo('detail', e)}
+          placeholder="ex. New Feature"
+        />
+      </div>
+      <Button
+        style={{
+          margin: 'auto',
+          display: 'block',
+          marginTop: '32px'
+        }}
+        onClick={e => {
+          //          e.preventDefault()
+          //          e.stopPropagation()
+          mergeToMaster()
+        }}
+      >
+        Merge to master
+      </Button>
+    </form>
+  )
+}
 
 const graphqler = (auth, query, variables) => {
   const authHeaders = auth.authHeaders()
@@ -235,6 +360,7 @@ const submitFullPr = (auth, _title, newSpec) => {
       })
     })
     .then(result => {
+      console.log('Result: ', result)
       const fileSha = result.data.gitHub.repository.object.oid
       console.log('Also got sha: ', fileSha)
       return graphqler(auth, updateFileContentQuery, {
@@ -270,6 +396,8 @@ class Endpoints extends React.Component {
       isLoggedInGitHub: null,
       prTitle: null,
       prDetail: null,
+      mergeTitle: null,
+      mergeDetail: null,
       isModalOpen: false,
       prList: null,
       isPRListActive: false,
@@ -338,6 +466,7 @@ class Endpoints extends React.Component {
   }
 
   updatePRInfo(field, value) {
+    console.log(field, value)
     switch (field) {
       case 'title':
         this.setState({
@@ -354,6 +483,23 @@ class Endpoints extends React.Component {
     }
   }
 
+  updateMergeInfo(field, value) {
+    switch (field) {
+      case 'title':
+        this.setState({
+          mergeTitle: value
+        })
+        break
+      case 'detail':
+        this.setState({
+          mergeDetail: value
+        })
+        break
+      default:
+        console.log('Unrecognized field name: ' + field)
+    }
+  }
+
   makeNewPR() {
     console.log('New PR', this.state.spec, '<--- the spec')
     window.ogAuth = this.state.auth
@@ -363,6 +509,24 @@ class Endpoints extends React.Component {
       isModalOpen: false,
       prTitle: null,
       prDetail: null
+    })
+  }
+
+  mergeToMaster() {
+    console.log('merge to master')
+    graphqler(this.state.auth, mergePRMutation, {
+      owner: repoOwner,
+      name: repoName,
+      number: this.state.focusedPR.number,
+      sha: this.state.focusedPR.headRef.target.oid,
+      title: this.state.mergeTitle
+    }).then(json => {
+      console.log('after merge:', json)
+    })
+    this.setState({
+      isModalOpen: false,
+      mergeTitle: null,
+      mergeDetail: null
     })
   }
 
@@ -414,7 +578,9 @@ class Endpoints extends React.Component {
         spec: newSpec,
         focusedPR: prInfo,
         isViewingPR: true,
-        isPRListActive: false
+        isPRListActive: false,
+        mergeTitle: `Merge #${prInfo.number} "${prInfo.title}"`,
+        mergeDetail: null
       }))
     })
   }
@@ -505,92 +671,43 @@ class Endpoints extends React.Component {
               }}
               onClick={e => this.toggleModal()}
             />
-            <form
-              style={{
-                width: '400px',
-                backgroundColor: 'white',
-                borderRadius: '4px',
-                padding: '24px',
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}
-            >
-              <label
-                style={{
-                  width: '80%',
-                  margin: 'auto',
-                  display: 'block',
-                  fontSize: '16px'
-                }}
-              >
-                PR Title:
-              </label>
-              <div
-                style={{
-                  width: '80%',
-                  margin: '0px auto 16px auto',
-                  display: 'grid'
-                }}
-              >
-                <Input
-                  onChange={e => this.updatePRInfo('title', e)}
-                  required
-                  placeholder="ex. Grammar Error"
-                />
-              </div>
-              <label
-                style={{
-                  width: '80%',
-                  margin: 'auto',
-                  display: 'block',
-                  fontSize: '16px'
-                }}
-              >
-                PR Detail:
-              </label>
-              <div
-                style={{
-                  width: '80%',
-                  margin: '0px auto 16px auto',
-                  display: 'grid'
-                }}
-              >
-                <Input
-                  onChange={e => this.updatePRInfo('detail', e.target.value)}
-                  placeholder="ex. Fix grammar error"
-                />
-              </div>
-              <Button
-                style={{
-                  margin: 'auto',
-                  display: 'block',
-                  marginTop: '32px'
-                }}
-                onClick={e => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  this.makeNewPR()
-                }}
-              >
-                Submit PR
-              </Button>
-            </form>
+            {this.state.focusedPR
+              ? formMerge(
+                  (field, value) => this.updateMergeInfo(field, value),
+                  () => this.mergeToMaster(),
+                  this.state.mergeTitle
+                )
+              : formPR(
+                  (field, value) => this.updatePRInfo(field, value),
+                  () => this.makeNewPR()
+                )}
           </div>
         ) : null}
         {this.state.auth ? (
           this.state.isLoggedInGitHub ? (
-            <Button
-              onClick={_e => this.toggleModal()}
-              style={{
-                position: 'fixed',
-                top: '90px',
-                right: '15px'
-              }}
-            >
-              Save
-            </Button>
+            this.state.focusedPR ? (
+              <Button
+                onClick={_e => this.toggleModal()}
+                style={{
+                  position: 'fixed',
+                  top: '90px',
+                  right: '15px'
+                }}
+              >
+                Merge current PR
+              </Button>
+            ) : (
+              <Button
+                onClick={_e => this.toggleModal()}
+                style={{
+                  position: 'fixed',
+                  top: '90px',
+                  right: '15px'
+                }}
+              >
+                Create PR
+              </Button>
+            )
           ) : (
             <Button
               style={{
@@ -600,7 +717,7 @@ class Endpoints extends React.Component {
               }}
               onClick={_e => this.handleGitHubLogin()}
             >
-              Log In to GitHub
+              Log in to GitHub to edit
             </Button>
           )
         ) : null}
