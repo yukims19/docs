@@ -13,6 +13,7 @@ import { diffString, diff } from 'json-diff'
 import OneGraphAuth from 'onegraph-auth'
 import Button from '~/components/buttons'
 import Input from '~/components/input'
+import { Menu, MenuItem, MenuDivider } from '~/components/menu'
 
 const _APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
 const APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
@@ -51,15 +52,15 @@ const createBranchQuery = `mutation createBranch(
 }`
 
 const updateFileContentQuery = `mutation updateFile(
-  $owner: String!
-  $name: String!
-  $branchName: String!
-  $path: String!
-  $message: String!
-  $content: String!
-  $sha: String!
-) {
-  gitHub {
+          $owner: String!
+          $name: String!
+          $branchName: String!
+          $path: String!
+          $message: String!
+          $content: String!
+          $sha: String!
+      ) {
+          gitHub {
     ogCreateOrUpdateFileContent(
       input: {
         message: $message
@@ -179,7 +180,8 @@ class Endpoints extends React.Component {
       isLoggedInGitHub: null,
       prTitle: null,
       prDetail: null,
-      isModalOpen: true
+      isModalOpen: false,
+      isPRListActive: false
     }
   }
 
@@ -261,6 +263,40 @@ class Endpoints extends React.Component {
     })
   }
 
+  handleClickOutsideMenu = () => {
+    this.setState(() => ({
+      isPRListActive: false
+    }))
+  }
+
+  togglePRList() {
+    this.setState(state => ({
+      isPRListActive: !this.state.isPRListActive
+    }))
+  }
+
+  renderMenuTrigger = ({ handleProviderRef, menu }) => {
+    const { user } = this.props
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: '90px',
+          right: '300px'
+        }}
+      >
+        <Button onClick={() => this.togglePRList()}>Requested PRs</Button>
+        {menu}
+      </div>
+    )
+  }
+
+  applyPRData(newSpec) {
+    this.setState(() => ({
+      spec: newSpec
+    }))
+  }
+
   render() {
     const updateSpec = (summary, updater) => {
       const copy = JSON.parse(JSON.stringify(this.state.spec))
@@ -279,6 +315,33 @@ class Endpoints extends React.Component {
 
     return (
       <>
+        <Menu
+          tip
+          active={this.state.isPRListActive}
+          onClickOutside={this.handleClickOutsideMenu}
+          render={this.renderMenuTrigger}
+          style={{ minWidth: 200, maxHeight: 230, overflow: 'auto' }}
+        >
+          <MenuItem>
+            <div onClick={() => this.applyPRData({})}>PR1</div>
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem>
+            <a>PR2</a>
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem>
+            <a>PR2</a>
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem>
+            <a>PR2</a>
+          </MenuItem>
+          <MenuDivider />
+          <MenuItem>
+            <a>PR2</a>
+          </MenuItem>
+        </Menu>
         {this.state.isModalOpen ? (
           <div
             style={{
@@ -399,19 +462,25 @@ class Endpoints extends React.Component {
             </Button>
           )
         ) : null}
-        <Deployments2 spec={this.state.spec} updateSpec={updateSpec} />
-        <Logs2 />
-        <Domains2 />
-        <DNS2 />
-        <Certificates2 />
-        <Aliases2 />
-        <Secrets2 />
-        <Teams2 />
-        <Authentication2 />
-        <OAuth2 />
+        <Deployments2
+          oldSpec={this.state.originalSpec}
+          spec={this.state.spec}
+          updateSpec={updateSpec}
+        />
       </>
     )
   }
 }
 
 export default Endpoints
+/*
+  <Logs2 />
+  <Domains2 />
+  <DNS2 />
+  <Certificates2 />
+  <Aliases2 />
+  <Secrets2 />
+  <Teams2 />
+  <Authentication2 />
+  <OAuth2 />
+*/
