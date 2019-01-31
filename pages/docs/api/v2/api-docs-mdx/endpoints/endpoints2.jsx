@@ -18,6 +18,8 @@ import CommentBox from './commentBox.jsx'
 
 const APP_ID = 'e3e709a0-3dee-4226-ab01-fae2fd689f98'
 const _APP_ID = '5e1bff40-2221-4608-94aa-5db9fa28bf1f'
+const repoName = 'docs'
+const repoOwner = 'yukims19'
 
 const getFileShaQuery = `query getFileSha($name: String!, $owner: String!, $branchAndFilePath: String!) {
   gitHub {
@@ -122,28 +124,59 @@ const getPRListQuery = `query allPullRequests(
         labels: $filterTag
       ) {
         nodes {
+          number
+          id
           title
           body
           isCrossRepository
-          timeline(first: 100) {
-            nodes {
-              ... on GitHubIssueComment {
-                id
-                body
-              }
+          comments(last: 20) {
+          nodes {
+            id
+            bodyText
+            author {
+              login
+              avatarUrl
             }
+            createdAt
           }
+        }
           baseRefName
           headRef {
             prefix
             name
             id
+            target {
+              id
+              repository {
+                owner {
+                  login
+                  id
+                }
+              }
+            }
           }
         }
       }
     }
   }
 }`
+
+const getPRSingleFileQuery = `query getFileContents(
+  $name: String!
+  $owner: String!
+  $branchAndFilePath: String = "master:package.json"
+) {
+  gitHub {
+    repository(name: $name, owner: $owner) {
+      object(expression: $branchAndFilePath) {
+        ... on GitHubBlob {
+          text
+        }
+      }
+    }
+  }
+}
+`
 
 const graphqler = (auth, query, variables) => {
   const authHeaders = auth.authHeaders()
@@ -167,10 +200,18 @@ const graphqler = (auth, query, variables) => {
 
 const getPRList = auth => {
   return graphqler(auth, getPRListQuery, {
-    owner: 'yukims19',
-    name: 'docs',
+    owner: repoOwner,
+    name: repoName,
     limit: 50,
     filterTag: ['onegraph-docs']
+  })
+}
+
+const getPRSingleFile = (auth, branch, owner) => {
+  return graphqler(auth, getPRSingleFileQuery, {
+    owner: owner,
+    name: repoName,
+    branchAndFilePath: `${branch}:pages/docs/api/v2/api-docs-mdx/endpoints/entireSpec.json`
   })
 }
 
@@ -354,13 +395,21 @@ class Endpoints extends React.Component {
   applyPRData(prInfo) {
     alert('This action will discard all un-saved changes')
     console.log(prInfo)
-    let newSpec = {}
-    this.setState(() => ({
-      spec: newSpec,
-      focusedPR: prInfo,
-      isViewingPR: true,
-      isPRListActive: false
-    }))
+    getPRSingleFile(
+      this.state.auth,
+      prInfo.headRef.name,
+      prInfo.headRef.target.repository.owner.login
+    ).then(json => {
+      console.log(json)
+      let newSpec = JSON.parse(json.data.gitHub.repository.object.text)
+      console.log('newSpec', newSpec)
+      this.setState(() => ({
+        spec: newSpec,
+        focusedPR: prInfo,
+        isViewingPR: true,
+        isPRListActive: false
+      }))
+    })
   }
 
   showOriginalDoc() {
@@ -390,8 +439,15 @@ class Endpoints extends React.Component {
       <>
         {this.state.isViewingPR ? (
           <div style={{ position: 'fixed', bottom: '50px', right: '100px' }}>
-            <CommentBox prInfo={this.state.focusedPR} />
-            <a onClick={() => this.showOriginalDoc()}>See Original Doc</a>
+            <CommentBox
+              prInfo={this.state.focusedPR}
+              auth={this.state.auth}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              focusedPR={this.state.focusedPR}
+              graphqler={graphqler}
+            />
+            <a onClick={() => this.showOriginalDoc()}>Restore Original Doc</a>
           </div>
         ) : null}
         <Menu
