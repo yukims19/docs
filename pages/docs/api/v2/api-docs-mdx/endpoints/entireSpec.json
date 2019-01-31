@@ -1087,7 +1087,7 @@
                 "schema": {
                   "properties": {
                     "aliases": {
-                      "description": "A list of the aliases assigned to the deployment.",
+                      "description": "A list of the aliases assigned to the deployment",
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/alias"
