@@ -83,17 +83,106 @@ class CommentBox extends React.Component {
   render() {
     console.log('commentbox', this.props)
     return (
-      <div>
-        <div style={{ border: '1px solid black' }}>
-          <UL>
-            {this.props.prInfo.timeline.nodes.map(
-              node => (node.body ? <li>{node.body}</li> : null)
-            )}
-            <LI>Comment 1</LI>
-          </UL>
-          <textarea />
+      <Card style={{ backgroundColor: ' #fafafa' }}>
+        <div
+          style={{
+            backgroundColor: 'white',
+            padding: '16px'
+          }}
+        >
+          {this.state.commentsNodes.map(
+            node =>
+              node.bodyText ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <img
+                    src={node.author.avatarUrl}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%'
+                    }}
+                  />
+                  <p
+                    style={{
+                      border: '1px solid #cfcfcf',
+                      borderRadius: '3px',
+                      padding: '7px 15px',
+                      marginLeft: '8px'
+                    }}
+                  >
+                    {node.bodyText}
+                  </p>
+                </div>
+              ) : null
+          )}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              borderTop: ' 1px solid #eaeaea'
+            }}
+          >
+            <input
+              value={this.state.comment}
+              onChange={e => this.updateComment(e.target.value)}
+              style={{
+                width: '100%',
+                height: '24px',
+                border: 'none',
+                outline: 'none',
+                borderRadius: '3px',
+                fontSize: '14px',
+                padding: '8px 4px 0px 4px',
+                resize: 'none'
+              }}
+              onKeyDown={e => {
+                console.log(e.keyCode)
+                e.keyCode === 13
+                  ? this.commentPR(
+                      this.props.auth,
+                      this.props.repoOwner,
+                      this.props.repoName,
+                      this.state.comment,
+                      this.props.focusedPR,
+                      this.props.graphqler
+                    )
+                  : null
+              }}
+            />
+            <button
+              onClick={_e =>
+                this.commentPR(
+                  this.props.auth,
+                  this.props.repoOwner,
+                  this.props.repoName,
+                  this.state.comment,
+                  this.props.focusedPR,
+                  this.props.graphqler
+                )
+              }
+              style={{
+                backgroundColor: 'black',
+                color: 'white',
+                border: 'none',
+                borderRadius: '3px',
+                height: '24px',
+                fontWeight: '600',
+                outline: 'none'
+              }}
+            >
+              SUBMIT
+            </button>
+          </div>
         </div>
-      </div>
+      </Card>
     )
   }
 }
