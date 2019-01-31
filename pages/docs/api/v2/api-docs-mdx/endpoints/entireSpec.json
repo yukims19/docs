@@ -30,7 +30,7 @@
                 "schema": {
                   "properties": {
                     "token": {
-                      "description": "The actual token used to verify the user accepted the login request.",
+                      "description": "The token used to verify the user accepted the login request.",
                       "type": "string"
                     },
                     "securityCode": {
@@ -1137,7 +1137,7 @@
     "/v2/now/files": {
       "post": {
         "operationId": "UploadDeploymentFilesV2",
-        "description": "Before you create a deployment you need to upload the required files for that deployment. To do it you need to POST each file to this endpoint, after that's completed you'll need to `POST` or `PUT` to [create a new deployment](#endpoints/deployments/create-a-new-deployment).\n\n**Note:** If you need to upload only a few small files for a deployment you could inline them when you're [creating a new deployment](#endpoints/deployments/create-a-new-deployment).",
+        "description": "Before you create a deployment you need to upload the required files for that deployment. To do it you need to POST each file to this endpoint, after that's completed you'll need to POST to [create a new deployment](#endpoints/deployments/create-a-new-deployment).\n\n**Note:** If you need to upload only a few small files for a deployment you could inline them when you're [creating a new deployment](#endpoints/deployments/create-a-new-deployment).",
         "parameters": [
           {
             "description": "The file size in bytes.",
@@ -1727,8 +1727,8 @@
     },
     "/v6/now/deployments": {
       "post": {
-        "operationId": "CreateANewDeploymentV6",
-        "description": "Create a new deployment with all the required and intended data.\n\n`Test` is a _codeword_.\nBefore creating a deployment, [upload any required files](#endpoints/deployments/upload-deployment-files) when they cannot be posted at once by inlining files.",
+        "operationId": "CreateANewDeploymentV6WowNow",
+        "description": "Create a new deployment with all the required and intended data.\n\nBefore creating a deployment, [upload any required files](#endpoints/deployments/upload-deployment-files) when they cannot be posted at once by inlining files.",
         "parameters": [
           {
             "in": "query",
