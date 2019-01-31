@@ -422,7 +422,9 @@ class Endpoints extends React.Component {
   showOriginalDoc() {
     this.setState(() => ({
       spec: this.state.originalSpec,
-      isViewingPR: false
+      isViewingPR: false,
+      focusedPR: null,
+      isPRListActive: false
     }))
   }
 
