@@ -106,10 +106,49 @@ const createPullRequestQuery = `mutation createPullRequest(
   }
 }`
 
+const getPRListQuery = `query allPullRequests(
+  $filterTag: [String!]
+  $name: String!
+  $owner: String!
+  $limit: Int!
+) {
+  gitHub {
+    repository(name: $name, owner: $owner) {
+      pullRequests(
+        orderBy: { direction: DESC, field: CREATED_AT }
+        first: $limit
+        states: OPEN
+        labels: $filterTag
+      ) {
+        nodes {
+          title
+          body
+          isCrossRepository
+          timeline(first: 100) {
+            nodes {
+              ... on GitHubIssueComment {
+                id
+                body
+              }
+            }
+          }
+          baseRefName
+          headRef {
+            prefix
+            name
+            id
+          }
+        }
+      }
+    }
+  }
+}`
+
 const graphqler = (auth, query, variables) => {
   const authHeaders = auth.authHeaders()
   const n = new Request(
-    'http://serve.onegraph.io:8082/dynamic?app_id=' + APP_ID,
+    'https://serve.onegraph.com/dynamic?app_id=' + APP_ID,
+    //            'http://serve.onegraph.io:8082/dynamic?app_id=' + APP_ID,
     {
       headers: authHeaders,
       method: 'POST',
@@ -122,6 +161,15 @@ const graphqler = (auth, query, variables) => {
     } else {
       alert('Something went wrong on api server!')
     }
+  })
+}
+
+const getPRList = auth => {
+  return graphqler(auth, getPRListQuery, {
+    owner: 'yukims19',
+    name: 'docs',
+    limit: 50,
+    filterTag: ['onegraph-docs']
   })
 }
 
@@ -181,14 +229,16 @@ class Endpoints extends React.Component {
       prTitle: null,
       prDetail: null,
       isModalOpen: false,
-      isPRListActive: false
+      prList: null,
+      isPRListActive: false,
+      focusedPR: null,
+      isViewingPR: false
     }
   }
 
   componentDidMount() {
     const auth = new OneGraphAuth({
-      appId: APP_ID,
-      oneGraphOrigin: 'http://serve.onegraph.io:8082'
+      appId: APP_ID
     })
 
     auth.isLoggedIn('github').then(isLoggedIn => {
@@ -204,7 +254,16 @@ class Endpoints extends React.Component {
       }
     })
 
-    window.testIt = this.makeNewPR.bind(this)
+    let prNodes = getPRList(auth).then(json => {
+      console.log(json)
+      let jsonData = json
+      let PRNodes = jsonData.data.gitHub.repository.pullRequests.nodes
+      this.setState({ prList: PRNodes }, () =>
+        console.log('PRLIst:', this.state.prList)
+      )
+    })
+
+    //window.testIt = this.makeNewPR.bind(this)
   }
 
   handleGitHubLogin() {
@@ -291,9 +350,22 @@ class Endpoints extends React.Component {
     )
   }
 
-  applyPRData(newSpec) {
+  applyPRData(prInfo) {
+    alert('This action will discard all un-saved changes')
+    console.log(prInfo)
+    let newSpec = {}
     this.setState(() => ({
-      spec: newSpec
+      spec: newSpec,
+      focusedPR: prInfo,
+      isViewingPR: true,
+      isPRListActive: false
+    }))
+  }
+
+  showOriginalDoc() {
+    this.setState(() => ({
+      spec: this.state.originalSpec,
+      isViewingPR: false
     }))
   }
 
@@ -322,25 +394,20 @@ class Endpoints extends React.Component {
           render={this.renderMenuTrigger}
           style={{ minWidth: 200, maxHeight: 230, overflow: 'auto' }}
         >
-          <MenuItem>
-            <div onClick={() => this.applyPRData({})}>PR1</div>
-          </MenuItem>
-          <MenuDivider />
-          <MenuItem>
-            <a>PR2</a>
-          </MenuItem>
-          <MenuDivider />
-          <MenuItem>
-            <a>PR2</a>
-          </MenuItem>
-          <MenuDivider />
-          <MenuItem>
-            <a>PR2</a>
-          </MenuItem>
-          <MenuDivider />
-          <MenuItem>
-            <a>PR2</a>
-          </MenuItem>
+          {this.state.prList
+            ? this.state.prList.map((pr, idx) => {
+                return (
+                  <div>
+                    {idx === 0 ? null : <MenuDivider />}
+                    <MenuItem>
+                      <a onClick={() => this.applyPRData(pr)}>
+                        <strong>{pr.title}</strong>
+                      </a>
+                    </MenuItem>
+                  </div>
+                )
+              })
+            : null}
         </Menu>
         {this.state.isModalOpen ? (
           <div
